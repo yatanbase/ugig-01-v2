@@ -240,6 +240,7 @@ export default function LoginPage() {
             </Fieldset.Content>
 
             <Button display={"flex"}
+            onClick={handleSubmit}
           colorScheme="blue"
           width="40%"
           padding="6"

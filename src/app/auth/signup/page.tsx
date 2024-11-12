@@ -253,6 +253,7 @@ export default function SignUpPage() {
             </Fieldset.Content>
 
             <Button
+            onClick={handleSubmit}
               type="submit"
               display="flex"
               colorScheme="blue"
