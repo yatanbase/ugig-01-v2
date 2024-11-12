@@ -1,6 +1,6 @@
-// components/SocketProvider.tsx
+// src/components/ui/SocketProvider.tsx
 "use client";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 interface SocketContextValue {
@@ -17,33 +17,36 @@ interface SocketProviderProps {
 
 const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-
-  const token = localStorage.getItem("token");
-  console.log("sent token", token);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    // Get token from local storage
-    if (token) {
+    const token = localStorage.getItem("token");
+    console.log("sent token", token);
+
+    if (token && !socketRef.current) {
       const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`, {
         extraHeaders: {
           Authorization: `Bearer ${token}`,
         },
       });
       console.log("newSocket", newSocket);
+      socketRef.current = newSocket;
       setSocket(newSocket);
+
       newSocket.on("connect", () => {
         console.log("Connected to server");
       });
 
       return () => {
-        newSocket?.disconnect();
+        newSocket.disconnect();
+        socketRef.current = null;
         setSocket(null);
       };
     }
-  }, [token]);
+  }, []);
 
   return (
-    <SocketContext.Provider value={{ socket }}>
+    <SocketContext.Provider value={{ socket: socketRef.current }}>
       {children}
     </SocketContext.Provider>
   );

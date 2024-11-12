@@ -60,6 +60,7 @@ export default function LoginPage() {
 
       // Login successful
       const data = await response.json();
+      localStorage.setItem("token", data.access_token);
       console.log(data);
       toaster.create({
         title: "Login successful.",

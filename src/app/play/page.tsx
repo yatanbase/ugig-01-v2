@@ -14,6 +14,7 @@ export default function Play() {
   );
 
   const { socket } = useContext(SocketContext);
+  console.log("play page socket", socket);
 
   useEffect(() => {
     if (socket) {

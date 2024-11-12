@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import { Provider } from "../components/ui/provider";
+import { SocketProvider } from "@/components/ui/SocketProvider";
 
 const inter = Inter({ subsets: ["latin"] });
+const pixelify = Pixelify_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,9 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} `}>
         {" "}
-        <Provider>{children}</Provider>
+        <Provider>
+          <SocketProvider>{children}</SocketProvider>
+        </Provider>
       </body>
     </html>
   );

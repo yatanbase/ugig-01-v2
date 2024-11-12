@@ -5,6 +5,9 @@ import { useEffect, useState, useContext } from "react";
 import { io } from "socket.io-client";
 import { SocketContext } from "../ui/SocketProvider";
 import { Box, VStack, Text, Heading, Button } from "@chakra-ui/react";
+import { Pixelify_Sans } from "next/font/google";
+
+const pixelify = Pixelify_Sans({ subsets: ["latin"] });
 
 const OnlineUsers: React.FC = () => {
   const { socket } = useContext(SocketContext);
@@ -45,7 +48,12 @@ const OnlineUsers: React.FC = () => {
 
   return (
     <VStack rowGap={4} align="center">
-      <Heading as="h2" size="lg" color={textColor}>
+      <Heading
+        as="h2"
+        fontSize="xl"
+        color={textColor}
+        className={pixelify.className}
+      >
         Online Players: {onlineUsers.length}
       </Heading>
     </VStack>
