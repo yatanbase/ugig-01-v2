@@ -5,7 +5,10 @@ import { io } from "socket.io-client";
 import { useEffect, useState, useContext } from "react";
 import GameGrid from "../../components/ui/Grid";
 import OnlineUsersList from "../../components/ui/OnlineUsersList";
-import { SocketContext } from "../../components/ui/SocketProvider";
+import {
+  SocketContext,
+  SocketProvider,
+} from "../../components/ui/SocketProvider";
 
 export default function Play() {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
@@ -49,16 +52,18 @@ export default function Play() {
   };
 
   return (
-    <Box>
-      <Container maxW="container.xl" centerContent>
-        <VStack rowGap={8} align="center">
-          <GameGrid
-            handleCellClick={handleCellClick}
-            selectedCells={selectedCells}
-          />
-          <OnlineUsersList />
-        </VStack>
-      </Container>
-    </Box>
+    <SocketProvider>
+      <Box>
+        <Container maxW="container.xl" centerContent>
+          <VStack rowGap={8} align="center">
+            <GameGrid
+              handleCellClick={handleCellClick}
+              selectedCells={selectedCells}
+            />
+            <OnlineUsersList />
+          </VStack>
+        </Container>
+      </Box>
+    </SocketProvider>
   );
 }

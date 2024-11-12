@@ -9,12 +9,13 @@ import {
   Input,
   Stack,
   Fieldset,
-  useRatingGroupItemContext,
 } from "@chakra-ui/react";
-import { Toaster, toaster } from "../../../components/ui/toaster";
 import { Field } from "@/components/ui/field";
+import { InputGroup } from "@/components/ui/input-group";
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // Import from next/navigation
+import { FaUser, FaLock } from "react-icons/fa";
+import { Toaster, toaster } from "@/components/ui/toaster";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -45,14 +46,12 @@ export default function LoginPage() {
           toaster.create({
             title: errorData.message, // Display the server message
             type: "error",
-            duration: 3000,
           });
         } else {
           setError("Login failed."); // Generic message if no specific message is provided
           toaster.create({
             title: "Login failed.",
             type: "error",
-            duration: 3000,
           });
         }
         return;
@@ -66,7 +65,6 @@ export default function LoginPage() {
         title: "Login successful.",
         description: "You have successfully logged in.",
         type: "success",
-        duration: 6000,
       });
       router.push("/"); // Redirect using next/navigation
     } catch (error) {
@@ -75,57 +73,73 @@ export default function LoginPage() {
       toaster.create({
         title: "An unexpected error occurred.",
         type: "error",
-        duration: 3000,
       });
     }
   };
 
   return (
-    <Container maxW="md" centerContent p={4}>
+    <Container
+      maxW="md"
+      centerContent
+      p={4}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      minH="100vh"
+    >
       <Toaster />
-      <Heading as="h1" size="lg" mb={4}>
-        Login
-      </Heading>
+      <VStack spacing={4} align="center" width="100%">
+        <Heading as="h1" size="lg" mb={4}>
+          Login
+        </Heading>
 
-      <Box as="form" onSubmit={handleSubmit} width="100%">
-        <Fieldset.Root size="lg" maxW="md">
-          <Stack>
-            <Fieldset.Legend>Login</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Please provide your login details below.
-            </Fieldset.HelperText>
-          </Stack>
+        <Box as="form" onSubmit={handleSubmit} width="100%">
+          <Fieldset.Root size="lg" maxW="md">
+            <Stack spacing={4}>
+              {/* <Fieldset.Legend>Login</Fieldset.Legend> */}
+              <Fieldset.HelperText>
+                Please provide your login details below.
+              </Fieldset.HelperText>
+            </Stack>
 
-          <Fieldset.Content>
-            <Field label="Username" required>
-              <Input
-                name="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </Field>
+            <Fieldset.Content>
+              <Field label="Username" required>
+                <InputGroup flex="1" startElement={<FaUser />}>
+                  <Input
+                    name="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
+                  />
+                </InputGroup>
+              </Field>
 
-            <Field label="Password" required>
-              <Input
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Field>
-          </Fieldset.Content>
+              <Field label="Password" required>
+                <InputGroup flex="1" startElement={<FaLock />}>
+                  <Input
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                  />
+                </InputGroup>
+              </Field>
+            </Fieldset.Content>
 
-          <Button
-            type="submit"
-            alignSelf="flex-start"
-            colorScheme="teal"
-            size="lg"
-          >
-            Login
-          </Button>
-        </Fieldset.Root>
-      </Box>
+            <Button
+              type="submit"
+              alignSelf="flex-start"
+              colorScheme="teal"
+              size="lg"
+              mt={4}
+            >
+              Login
+            </Button>
+          </Fieldset.Root>
+        </Box>
+      </VStack>
     </Container>
   );
 }
