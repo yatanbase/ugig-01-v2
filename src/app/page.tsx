@@ -239,7 +239,7 @@ export default function Home() {
             <Box
               as={Button}
               className={` bg-gradient-to-r from-gray-700 to-gray-900 px-4 `}
-              size="lg"
+              // size="lg"
               onClick={handleLaunchGame}
               animation="glow 1.5s infinite"
               _hover={{
@@ -251,7 +251,7 @@ export default function Home() {
             >
               LAUNCH GAME
             </Box>
-            <OnlineUsers />
+            {/* <OnlineUsers /> */}
           </VStack>
         </Flex>
       </Container>

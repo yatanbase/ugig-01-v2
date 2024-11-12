@@ -88,14 +88,14 @@ export default function LoginPage() {
       minH="100vh"
     >
       <Toaster />
-      <VStack spacing={4} align="center" width="100%">
+      <VStack rowGap={4} align="center" width="100%">
         <Heading as="h1" size="lg" mb={4}>
           Login
         </Heading>
 
         <Box as="form" onSubmit={handleSubmit} width="100%">
           <Fieldset.Root size="lg" maxW="md">
-            <Stack spacing={4}>
+            <Stack rowGap={4}>
               {/* <Fieldset.Legend>Login</Fieldset.Legend> */}
               <Fieldset.HelperText>
                 Please provide your login details below.
