@@ -4,7 +4,6 @@ import {
   Heading,
   Box,
   Button,
-  VStack,
   Container,
   Input,
   Stack,
@@ -12,17 +11,17 @@ import {
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "../../../components/ui/toaster";
 import { Field } from "@/components/ui/field";
-import {
-  NativeSelectField,
-  NativeSelectRoot,
-} from "@/components/ui/native-select";
-import { useState } from "react";
+import { useState ,useEffect,useMemo} from "react";
 import { useRouter } from "next/navigation"; // Import from next/navigation
+import { FaUser,FaLock, FaBold } from 'react-icons/fa';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [init, setInit] = useState(false);
   const [error, setError] = useState<string | null>(null); // For more specific error display
   const router = useRouter();
 
@@ -81,60 +80,193 @@ export default function SignUpPage() {
     }
   };
 
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
+  const particlesLoaded = (container) => {
+    console.log(container);
+  };
+
+  const particlesOptions = useMemo(
+    () => ({
+      background: {
+        color: {
+          value: "#000000",
+        },
+      },
+      fpsLimit: 60,
+      interactivity: {
+        events: {
+          onClick: {
+            enable: true,
+            mode: "push",
+          },
+          onHover: {
+            enable: true,
+            mode: "repulse",
+          },
+          resize: true,
+        },
+        modes: {
+          push: {
+            quantity: 2,
+          },
+          repulse: {
+            distance: 100,
+            duration: 0.2,
+          },
+        },
+      },
+      particles: {
+        color: {
+          value: "#ffffff",
+        },
+        links: {
+          color: "#ffffff",
+          distance: 100,
+          enable: true,
+          opacity: 0.6,
+          width: 0.5,
+        },
+        collisions: {
+          enable: true,
+        },
+        move: {
+          direction: "none",
+          enable: true,
+          outModes: {
+            default: "bounce",
+          },
+          random: false,
+          speed: 1,
+          straight: false,
+        },
+        number: {
+          density: {
+            enable: true,
+            area: 800,
+          },
+          value: 40,
+        },
+        opacity: {
+          value: 0.3,
+        },
+        shape: {
+          type: "circle",
+        },
+        size: {
+          value: { min: 1, max: 3 },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
+
   return (
-    <Container maxW="md" centerContent p={4}>
-      <Toaster />
-      <Heading as="h1" size="lg" mb={4}>
-        Sign Up
-      </Heading>
+    <Box 
+      className="bg-zinc-800"
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      color="white"
+      p={8}
+    >
+       {init && (
+          <Particles
+          
+            id="tsparticles"
+            particlesLoaded={particlesLoaded}
+            options={particlesOptions}
+          />
+        )}
+      <Container
+        className="bg-black border-solid border-gray-50"
+        maxW="md"
+        p={6}
+        border="1px solid"
+        borderColor="gray"
+        borderRadius="md"
+        boxShadow="lg"
+      >
+        <Toaster />
+        <Heading as="h1" fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
+          Sign Up
+        </Heading>
 
-      <Box as="form" onSubmit={handleSubmit} width="100%">
-        <Fieldset.Root size="lg" maxW="md">
-          <Stack>
-            <Fieldset.Legend>Sign Up</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Please provide your details below.
-            </Fieldset.HelperText>
-          </Stack>
+        <Box as="form" onSubmit={handleSubmit} width="100%">
+          <Fieldset.Root size="lg">
+            <Stack rowGap={4}>
+              <Fieldset.HelperText textAlign="center">
+                
+                Please provide your details below.
+              </Fieldset.HelperText>
+            </Stack>
 
-          <Fieldset.Content>
-            <Field label="Username" required>
-              <Input
-                name="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </Field>
+            <Fieldset.Content>
+              <Field label="Username" required>
+                <Input
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your username"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
 
-            <Field label="Email address" required>
-              <Input
-                name="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Field>
+              <Field label="Email address" required>
+                <Input
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your email"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
 
-            <Field label="Password" required>
-              <Input
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Field>
-          </Fieldset.Content>
+              <Field label="Password" marginBottom={6} required>
+                <Input
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your password"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
+            </Fieldset.Content>
 
-          <Button
-            type="submit"
-            alignSelf="flex-start"
-            colorScheme="teal"
-            size="lg"
-          >
-            Sign Up
-          </Button>
-        </Fieldset.Root>
-      </Box>
-    </Container>
+            <Button
+              type="submit"
+              display="flex"
+              colorScheme="blue"
+              width="40%"
+              padding="6"
+              fontWeight="bold"
+              className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
+              alignSelf="center"
+            >
+              Sign Up
+            </Button>
+          </Fieldset.Root>
+        </Box>
+      </Container>
+    </Box>
   );
 }
