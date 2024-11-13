@@ -38,7 +38,7 @@ export default function LoginPage() {
     });
   }, []);
 
-  const particlesLoaded = (container) => {
+  const particlesLoaded = (container:any) => {
     console.log(container);
   };
 
@@ -135,14 +135,20 @@ export default function LoginPage() {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const message = errorData.message || "Login failed.";
-        setError(message);
-        toaster.create({
-          title: message,
-          type: "error",
-          duration: 3000,
-        });
+        const errorData = await response.json(); // Get error details
+        if (errorData.message) {
+          setError(errorData.message); // Set specific error message
+          toaster.create({
+            title: errorData.message, // Display the server message
+            type: "error",
+          });
+        } else {
+          setError("Login failed."); // Generic message if no specific message is provided
+          toaster.create({
+            title: "Login failed.",
+            type: "error",
+          });
+        }
         return;
       }
 
@@ -152,15 +158,13 @@ export default function LoginPage() {
         title: "Login successful.",
         description: "You have successfully logged in.",
         type: "success",
-        duration: 6000,
       });
-      router.push("/play");
+      router.push("/");
     } catch (error) {
       setError("An unexpected error occurred.");
       toaster.create({
         title: "An unexpected error occurred.",
         type: "error",
-        duration: 3000,
       });
     }
   };

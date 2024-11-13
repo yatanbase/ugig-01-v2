@@ -21,9 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} `}>
         {" "}
-        <Provider>
-          <SocketProvider>{children}</SocketProvider>
-        </Provider>
+        <Provider>{children}</Provider>
       </body>
     </html>
   );

@@ -132,7 +132,7 @@ export default function Home() {
 
   return (
     <Box minH="100vh" position="relative" overflow="hidden">
-      <Container maxW="container.xl" p={4} position="relative" zIndex={1}>
+      <Container maxW="90%" p={4} position="relative" zIndex={1}>
         {init && (
           <Particles
             id="tsparticles"
@@ -221,7 +221,7 @@ export default function Home() {
           mt={12}
         >
           <VStack
-            rowGap={10}
+            rowGap={20}
             align="center"
             css={{
               zIndex: 1000,
@@ -239,7 +239,7 @@ export default function Home() {
             <Box
               as={Button}
               className={` bg-gradient-to-r from-gray-700 to-gray-900 px-4 `}
-              size="lg"
+              // size="lg"
               onClick={handleLaunchGame}
               animation="glow 1.5s infinite"
               _hover={{
@@ -251,7 +251,7 @@ export default function Home() {
             >
               LAUNCH GAME
             </Box>
-            <OnlineUsers />
+            {/* <OnlineUsers /> */}
           </VStack>
         </Flex>
       </Container>

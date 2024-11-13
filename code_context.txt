@@ -1407,25 +1407,30 @@ export const NumberInputLabel = ChakraNumberInput.Label
 // components/OnlineUsers.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { io } from "socket.io-client";
+import { SocketContext } from "../ui/SocketProvider";
 import { Box, VStack, Text, Heading, Button } from "@chakra-ui/react";
+import { Pixelify_Sans } from "next/font/google";
+
+const pixelify = Pixelify_Sans({ subsets: ["latin"] });
 
 const OnlineUsers: React.FC = () => {
+  const { socket } = useContext(SocketContext);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const [socket, setSocket] = useState<any>(null);
+  // const [socket, setSocket] = useState<any>(null);
 
-  const emitted = false;
-  useEffect(() => {
-    const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`);
-    setSocket(newSocket);
+  // const emitted = false;
+  // useEffect(() => {
+  //   const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`);
+  //   setSocket(newSocket);
 
-    return () => {
-      if (newSocket) {
-        newSocket.disconnect();
-      }
-    };
-  }, []);
+  //   return () => {
+  //     if (newSocket) {
+  //       newSocket.disconnect();
+  //     }
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (socket) {
@@ -1449,7 +1454,12 @@ const OnlineUsers: React.FC = () => {
 
   return (
     <VStack rowGap={4} align="center">
-      <Heading as="h2" size="lg" color={textColor}>
+      <Heading
+        as="h2"
+        fontSize="xl"
+        color={textColor}
+        className={pixelify.className}
+      >
         Online Players: {onlineUsers.length}
       </Heading>
     </VStack>
@@ -1461,29 +1471,32 @@ export default OnlineUsers;
 
 
 // File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\OnlineUsersList.tsx
+// src/components/OnlineUserList.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+
 import { Box, VStack, Text, Heading } from "@chakra-ui/react";
-import { getSocket } from "@/utils/socket";
+import { SocketContext } from "../ui/SocketProvider";
 
 const OnlineUserList: React.FC = () => {
+  const { socket } = useContext(SocketContext);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const socket = getSocket();
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Connected to server");
-      socket.emit("getOnlineUsers"); // Get initial user list
-    });
+    if (socket) {
+      socket.on("connect", () => {
+        socket.emit("getOnlineUsers"); // Get initial user list
+      });
 
-    socket.on("updateUserList", (users: any) => {
-      setOnlineUsers(users);
-    });
+      socket.on("updateUserList", (users: any) => {
+        setOnlineUsers(users);
+      });
 
-    return () => {
-      socket.off("connect");
-      socket.off("updateUserList");
-    };
+      return () => {
+        socket.off("connect");
+        socket.off("updateUserList");
+      };
+    }
   }, [socket]);
 
   return (
@@ -2761,6 +2774,65 @@ export const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
 
 
+// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\SocketProvider.tsx
+// src/components/ui/SocketProvider.tsx
+"use client";
+import { createContext, useEffect, useRef, useState } from "react";
+import { io, Socket } from "socket.io-client";
+
+interface SocketContextValue {
+  socket: Socket | null;
+}
+
+const SocketContext = createContext<SocketContextValue>({
+  socket: null,
+});
+
+interface SocketProviderProps {
+  children: React.ReactNode;
+}
+
+const SocketProvider = ({ children }: SocketProviderProps) => {
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    console.log("sent token", token);
+
+    if (token && !socketRef.current) {
+      const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`, {
+        extraHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("newSocket", newSocket);
+      socketRef.current = newSocket;
+      setSocket(newSocket);
+
+      newSocket.on("connect", () => {
+        console.log("Connected to server");
+      });
+
+      return () => {
+        newSocket.disconnect();
+        socketRef.current = null;
+        setSocket(null);
+      };
+    }
+  }, []);
+
+  return (
+    <SocketContext.Provider value={{ socket: socketRef.current }}>
+      {children}
+    </SocketContext.Provider>
+  );
+};
+
+export { SocketContext, SocketProvider };
+
+
+
 // File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\stat.tsx
 import {
   Badge,
@@ -3351,12 +3423,13 @@ import {
   Input,
   Stack,
   Fieldset,
-  useRatingGroupItemContext,
 } from "@chakra-ui/react";
-import { Toaster, toaster } from "../../../components/ui/toaster";
 import { Field } from "@/components/ui/field";
+import { InputGroup } from "@/components/ui/input-group";
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // Import from next/navigation
+import { FaUser, FaLock } from "react-icons/fa";
+import { Toaster, toaster } from "@/components/ui/toaster";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -3387,14 +3460,12 @@ export default function LoginPage() {
           toaster.create({
             title: errorData.message, // Display the server message
             type: "error",
-            duration: 3000,
           });
         } else {
           setError("Login failed."); // Generic message if no specific message is provided
           toaster.create({
             title: "Login failed.",
             type: "error",
-            duration: 3000,
           });
         }
         return;
@@ -3402,12 +3473,12 @@ export default function LoginPage() {
 
       // Login successful
       const data = await response.json();
+      localStorage.setItem("token", data.access_token);
       console.log(data);
       toaster.create({
         title: "Login successful.",
         description: "You have successfully logged in.",
         type: "success",
-        duration: 6000,
       });
       router.push("/"); // Redirect using next/navigation
     } catch (error) {
@@ -3416,57 +3487,73 @@ export default function LoginPage() {
       toaster.create({
         title: "An unexpected error occurred.",
         type: "error",
-        duration: 3000,
       });
     }
   };
 
   return (
-    <Container maxW="md" centerContent p={4}>
+    <Container
+      maxW="md"
+      centerContent
+      p={4}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      minH="100vh"
+    >
       <Toaster />
-      <Heading as="h1" size="lg" mb={4}>
-        Login
-      </Heading>
+      <VStack spacing={4} align="center" width="100%">
+        <Heading as="h1" size="lg" mb={4}>
+          Login
+        </Heading>
 
-      <Box as="form" onSubmit={handleSubmit} width="100%">
-        <Fieldset.Root size="lg" maxW="md">
-          <Stack>
-            <Fieldset.Legend>Login</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Please provide your login details below.
-            </Fieldset.HelperText>
-          </Stack>
+        <Box as="form" onSubmit={handleSubmit} width="100%">
+          <Fieldset.Root size="lg" maxW="md">
+            <Stack spacing={4}>
+              {/* <Fieldset.Legend>Login</Fieldset.Legend> */}
+              <Fieldset.HelperText>
+                Please provide your login details below.
+              </Fieldset.HelperText>
+            </Stack>
 
-          <Fieldset.Content>
-            <Field label="Username" required>
-              <Input
-                name="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </Field>
+            <Fieldset.Content>
+              <Field label="Username" required>
+                <InputGroup flex="1" startElement={<FaUser />}>
+                  <Input
+                    name="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
+                  />
+                </InputGroup>
+              </Field>
 
-            <Field label="Password" required>
-              <Input
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Field>
-          </Fieldset.Content>
+              <Field label="Password" required>
+                <InputGroup flex="1" startElement={<FaLock />}>
+                  <Input
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                  />
+                </InputGroup>
+              </Field>
+            </Fieldset.Content>
 
-          <Button
-            type="submit"
-            alignSelf="flex-start"
-            colorScheme="teal"
-            size="lg"
-          >
-            Login
-          </Button>
-        </Fieldset.Root>
-      </Box>
+            <Button
+              type="submit"
+              alignSelf="flex-start"
+              colorScheme="teal"
+              size="lg"
+              mt={4}
+            >
+              Login
+            </Button>
+          </Fieldset.Root>
+        </Box>
+      </VStack>
     </Container>
   );
 }
@@ -3622,27 +3709,19 @@ export default function SignUpPage() {
 "use client";
 import { Box, Container, VStack } from "@chakra-ui/react";
 import { io } from "socket.io-client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import GameGrid from "../../components/ui/Grid";
 import OnlineUsersList from "../../components/ui/OnlineUsersList";
+import { SocketContext } from "../../components/ui/SocketProvider";
 
 export default function Play() {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const [socket, setSocket] = useState<any>(null);
   const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
     {}
   );
 
-  useEffect(() => {
-    const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`);
-    setSocket(newSocket);
-
-    return () => {
-      if (newSocket) {
-        newSocket.disconnect();
-      }
-    };
-  }, []);
+  const { socket } = useContext(SocketContext);
+  console.log("play page socket", socket);
 
   useEffect(() => {
     if (socket) {
@@ -3656,9 +3735,9 @@ export default function Play() {
       });
 
       socket.on("cellSelected", (data: any) => {
-        console.log(`Client ${data.clientId} selected cell ${data.cell}`);
+        console.log(`Client ${data.username} selected cell ${data.cell}`);
 
-        setSelectedCells((prev) => ({ ...prev, [data.cell]: data.clientId }));
+        setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
       });
 
       return () => {
@@ -3680,17 +3759,131 @@ export default function Play() {
     <Box>
       <Container maxW="container.xl" centerContent>
         <VStack rowGap={8} align="center">
-          <OnlineUsersList />
-
           <GameGrid
             handleCellClick={handleCellClick}
             selectedCells={selectedCells}
           />
+          <OnlineUsersList />
         </VStack>
       </Container>
     </Box>
   );
 }
+
+
+
+// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\tsparticles\page.tsx
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+
+const TestParticles = () => {
+  const [init, setInit] = useState(false);
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
+  const particlesLoaded = (container) => {
+    console.log(container);
+  };
+
+  const particlesOptions = useMemo(
+    () => ({
+      background: {
+        color: {
+          value: "#000000",
+        },
+      },
+      fpsLimit: 60,
+      interactivity: {
+        events: {
+          onClick: {
+            enable: true,
+            mode: "push",
+          },
+          onHover: {
+            enable: true,
+            mode: "repulse",
+          },
+          resize: true,
+        },
+        modes: {
+          push: {
+            quantity: 4,
+          },
+          repulse: {
+            distance: 200,
+            duration: 0.4,
+          },
+        },
+      },
+      particles: {
+        color: {
+          value: "#ffffff",
+        },
+        links: {
+          color: "#ffffff",
+          distance: 150,
+          enable: true,
+          opacity: 0.5,
+          width: 1,
+        },
+        collisions: {
+          enable: true,
+        },
+        move: {
+          direction: "none",
+          enable: true,
+          outModes: {
+            default: "bounce",
+          },
+          random: false,
+          speed: 2,
+          straight: false,
+        },
+        number: {
+          density: {
+            enable: true,
+            area: 800,
+          },
+          value: 80,
+        },
+        opacity: {
+          value: 0.5,
+        },
+        shape: {
+          type: "circle",
+        },
+        size: {
+          value: { min: 1, max: 5 },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
+
+  return (
+    <div style={{ height: "100vh", backgroundColor: "#000000" }}>
+      {init && (
+        <Particles
+          id="tsparticles"
+          particlesLoaded={particlesLoaded}
+          options={particlesOptions}
+        />
+      )}
+    </div>
+  );
+};
+
+export default TestParticles;
 
 
 
@@ -3727,11 +3920,13 @@ body {
 
 // File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\layout.tsx
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import { Provider } from "../components/ui/provider";
+import { SocketProvider } from "@/components/ui/SocketProvider";
 
 const inter = Inter({ subsets: ["latin"] });
+const pixelify = Pixelify_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -3745,9 +3940,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} `}>
         {" "}
-        <Provider>{children}</Provider>
+        <Provider>
+          <SocketProvider>{children}</SocketProvider>
+        </Provider>
       </body>
     </html>
   );
@@ -3767,7 +3964,7 @@ import {
   VStack,
   Flex,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import OnlineUsers from "../components/ui/OnlineUsers";
@@ -3784,25 +3981,130 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useRouter } from "next/navigation";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import { FaBars } from "react-icons/fa";
+import { Pixelify_Sans } from "next/font/google";
 
+const pixelify = Pixelify_Sans({ subsets: ["latin"] });
 export default function Home() {
   const [open, setOpen] = useState(false);
+  const [init, setInit] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
+  const particlesLoaded = (container) => {
+    console.log(container);
+  };
+
+  const particlesOptions = useMemo(
+    () => ({
+      background: {
+        color: {
+          value: "#000000",
+        },
+      },
+      fpsLimit: 60,
+      interactivity: {
+        events: {
+          onClick: {
+            enable: true,
+            mode: "push",
+          },
+          onHover: {
+            enable: true,
+            mode: "repulse",
+          },
+          resize: true,
+        },
+        modes: {
+          push: {
+            quantity: 2,
+          },
+          repulse: {
+            distance: 100,
+            duration: 0.2,
+          },
+        },
+      },
+      particles: {
+        color: {
+          value: "#ffffff",
+        },
+        links: {
+          color: "#ffffff",
+          distance: 100,
+          enable: true,
+          opacity: 0.6,
+          width: 0.5,
+        },
+        collisions: {
+          enable: true,
+        },
+        move: {
+          direction: "none",
+          enable: true,
+          outModes: {
+            default: "bounce",
+          },
+          random: false,
+          speed: 1,
+          straight: false,
+        },
+        number: {
+          density: {
+            enable: true,
+            area: 800,
+          },
+          value: 40,
+        },
+        opacity: {
+          value: 0.3,
+        },
+        shape: {
+          type: "circle",
+        },
+        size: {
+          value: { min: 1, max: 3 },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
+
   const handleLaunchGame = () => {
-    // You would navigate to /play on button click here
     router.push("/play");
     console.log("Launching game...");
   };
 
   return (
-    <Box minH="100vh">
-      <Container maxW="container.xl" p={4}>
+    <Box minH="100vh" position="relative" overflow="hidden">
+      <Container maxW="90%" p={4} position="relative" zIndex={1}>
+        {init && (
+          <Particles
+            id="tsparticles"
+            particlesLoaded={particlesLoaded}
+            options={particlesOptions}
+          />
+        )}
         <Flex justifyContent="space-between" alignItems="center">
-          <DrawerRoot open={open} onOpenChange={(e) => setOpen(e.open)}>
+          <DrawerRoot
+            open={open}
+            onOpenChange={(e) => setOpen(e.open)}
+            placement={"start"}
+          >
             <DrawerBackdrop />
             <DrawerTrigger asChild>
-              <Button variant="outline" size="sm">
-                ...
+              <Button variant="outline" size="sm" colorScheme="gray">
+                <FaBars />
               </Button>
             </DrawerTrigger>
             <DrawerContent>
@@ -3812,12 +4114,16 @@ export default function Home() {
               <DrawerBody>
                 <VStack rowGap={4} align="start">
                   <Link href="/auth/login">
-                    <Button variant="ghost" onClick={() => setOpen(false)}>
+                    <Button
+                      variant="ghost"
+                      colorScheme="gray"
+                      onClick={() => setOpen(false)}
+                    >
                       Login
                     </Button>
                   </Link>
                   <Link href="/auth/signup">
-                    <Button colorScheme="teal" onClick={() => setOpen(false)}>
+                    <Button colorScheme="gray" onClick={() => setOpen(false)}>
                       Sign Up
                     </Button>
                   </Link>
@@ -3825,7 +4131,11 @@ export default function Home() {
               </DrawerBody>
               <DrawerFooter>
                 <DrawerActionTrigger asChild>
-                  <Button variant="outline" onClick={() => setOpen(false)}>
+                  <Button
+                    variant="outline"
+                    colorScheme="gray"
+                    onClick={() => setOpen(false)}
+                  >
                     Close
                   </Button>
                 </DrawerActionTrigger>
@@ -3841,16 +4151,19 @@ export default function Home() {
             flexGrow={1}
             fontFamily={"Roboto"}
             fontSize={{ base: "2xl", md: "3xl" }}
+            color="white"
           >
             UGIG
           </Heading>
 
           <HStack columnGap={4} display={{ base: "none", md: "flex" }}>
             <Link href="/auth/login">
-              <Button variant="ghost">Login</Button>
+              <Button variant="ghost" colorScheme="gray">
+                Login
+              </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button colorScheme="teal">Sign Up</Button>
+              <Button colorScheme="gray">Sign Up</Button>
             </Link>
           </HStack>
         </Flex>
@@ -3862,23 +4175,37 @@ export default function Home() {
           minH="80vh"
           mt={12}
         >
-          <VStack rowGap={10} align="center">
-            <Image
-              src={"/gamelogo.jpg"}
-              alt="Game Logo"
-              width={200}
-              height={300}
-            />
-            <Button
-              className="bg-gradient-to-r from-teal-400 to-teal-500 px-4"
+          <VStack
+            rowGap={10}
+            align="center"
+            css={{
+              zIndex: 1000,
+            }}
+          >
+            <div style={{ right: "50px" }}>
+              <Image
+                src={"/gamelogo.gif"}
+                style={{ right: "50px" }}
+                alt="Game Logo"
+                width={200}
+                height={300}
+              />
+            </div>
+            <Box
+              as={Button}
+              className={` bg-gradient-to-r from-gray-700 to-gray-900 px-4 `}
               size="lg"
-              onClick={() => {
-                // You would navigate to /play on button click here
-                handleLaunchGame();
+              onClick={handleLaunchGame}
+              animation="glow 1.5s infinite"
+              _hover={{
+                animation: "none",
               }}
+              color="WHITE"
+              px={10}
+              py={5}
             >
-              Launch Game
-            </Button>
+              LAUNCH GAME
+            </Box>
             <OnlineUsers />
           </VStack>
         </Flex>
@@ -3886,15 +4213,4 @@ export default function Home() {
     </Box>
   );
 }
-
-import { io, Socket } from "socket.io-client";
-
-let socket: Socket | null = null;
-
-export const getSocket = (): Socket => {
-  if (!socket) {
-    socket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`);
-  }
-  return socket;
-};
 
