@@ -130,8 +130,8 @@ export default function InsidePlay() {
 
   const handleCellClick = (cell: string) => {
     if (socket && roomId) {
-      socket.emit("selectCell", cell);
-      console.log("Cell clicked:", cell);
+      socket.emit("selectCell", { cell, roomId });
+      console.log("Cell clicked and emitted from client:", cell);
     }
   };
 
@@ -163,6 +163,8 @@ export default function InsidePlay() {
               <GameGrid
                 handleCellClick={handleCellClick}
                 selectedCells={selectedCells}
+                roomId={roomId}
+                setRoomId={setRoomId}
               />
               <OnlineUsersList
                 onlineUsers={onlineUsers}
