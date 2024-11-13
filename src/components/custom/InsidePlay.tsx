@@ -44,6 +44,9 @@ export default function InsidePlay() {
         console.log("Connected to server");
         socket.emit("getOnlineUsers"); // Get initial user list
       });
+      socket.on("updateUserList", (users: any) => {
+        setOnlineUsers(users);
+      });
       const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
@@ -163,6 +166,7 @@ export default function InsidePlay() {
               />
               <OnlineUsersList
                 onlineUsers={onlineUsers}
+
                 // handleInvite={handleInvite}
               />{" "}
               {/* Pass handleInvite */}

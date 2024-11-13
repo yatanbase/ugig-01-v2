@@ -6,13 +6,13 @@ import { Box, VStack, Text, Heading, HStack, Button } from "@chakra-ui/react";
 import { SocketContext } from "../ui/SocketProvider";
 interface OnlineUserProps {
   onlineUsers: string[];
-  handleInvite: (username: string) => void; // Add handleInvite prop
+  // handleInvite: (username: string) => void; // Add handleInvite prop
 }
 
-const OnlineUserList: React.FC = () => {
+const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
   const { socket } = useContext(SocketContext);
   console.log("onlineuserslist socket", socket);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  // const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [inviteStatus, setInviteStatus] = useState<string | null>(null); // State for invite status
 
   const handleInvite = (username: string) => {
@@ -28,13 +28,13 @@ const OnlineUserList: React.FC = () => {
 
   useEffect(() => {
     if (socket) {
-      socket.on("connect", () => {
-        socket.emit("getOnlineUsers"); // Get initial user list
-      });
+      // socket.on("connect", () => {
+      //   socket.emit("getOnlineUsers"); // Get initial user list
+      // });
 
-      socket.on("updateUserList", (users: any) => {
-        setOnlineUsers(users);
-      });
+      // socket.on("updateUserList", (users: any) => {
+      //   setOnlineUsers(users);
+      // });
 
       socket.on(
         "inviteResponse",
@@ -87,7 +87,12 @@ const OnlineUserList: React.FC = () => {
 
                 {/* Invite button */}
                 <Button
-                  className="bg-white text-black px-3 py-1"
+                  disabled={user === sessionStorage.getItem("username")}
+                  className={`px-3 py-1 ${
+                    user === sessionStorage.getItem("username")
+                      ? "bg-gray-400 text-white"
+                      : "bg-white text-black"
+                  }`}
                   onClick={() => handleInvite(user)}
                 >
                   Invite
