@@ -1,5 +1,188 @@
 
 
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\custom\InsidePlay.tsx
+"use client";
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+// import { io } from "socket.io-client";
+import { useEffect, useState, useContext } from "react";
+import GameGrid from "../../components/ui/Grid";
+import OnlineUsersList from "../../components/ui/OnlineUsersList";
+import { Socket } from "socket.io-client";
+import {
+  SocketContext,
+  SocketProvider,
+} from "../../components/ui/SocketProvider";
+
+import { Toaster, toaster } from "@/components/ui/toaster";
+
+export default function InsidePlay() {
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [roomId, setRoomId] = useState<string | null>(null);
+
+  const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
+    {}
+  );
+  const [inviteSent, setInviteSent] = useState(false); // Track invite status
+  const [receivedInvite, setReceivedInvite] = useState<
+    | {
+        from: string;
+      }
+    | undefined
+  >(undefined);
+
+  const { socket } = useContext(SocketContext);
+
+  console.log("play page socket", socket);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("connect", () => {
+        console.log("Connected to server");
+        socket.emit("getOnlineUsers"); // Get initial user list
+      });
+      const handleAnyEvent = (event: any, ...args: any) => {
+        console.log(`Received event: ${event}`, args);
+      };
+
+      socket.onAny(handleAnyEvent);
+      socket.on("updateUserList", (users: any) => {
+        const otherUsers = users.filter(
+          (user: any) => user !== localStorage.getItem("username")
+        );
+        setOnlineUsers(otherUsers); // Update state with other users
+      });
+      socket.on("joinedRoom", (data) => {
+        setRoomId(data.roomId);
+        console.log("Joined room:", data.roomId);
+      });
+      socket.on("receiveInvite", (data) => {
+        console.log("pohoch gaye");
+        console.log("Received invite from:", data);
+        setReceivedInvite(data); // Set receivedInvite state
+        toaster.create({
+          title: `Received invite from ${data.from}`,
+          type: "info",
+          duration: 10000,
+        });
+      });
+
+      socket.on("joinRoom", (data) => {
+        console.log("Joining room:", data.roomId);
+        setRoomId(data.roomId); // Update roomId state
+        handleJoinRoom(data.roomId); // Call handleJoinRoom to join the room on the frontend
+      });
+      socket.on("joinedRoom", (data) => {
+        setRoomId(data.roomId);
+        console.log("Joined room:", data.roomId);
+
+        toaster.create({
+          title: "Joined Room",
+          description: `Room ID :  ${data.roomId}`,
+          type: "info",
+          duration: 9000,
+        });
+      });
+      socket.on("cellSelected", (data: any) => {
+        console.log(`client ${data.username} selected cell ${data.cell}`);
+
+        setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
+      });
+
+      return () => {
+        socket.off("connect");
+        socket.off("updateUserList");
+        socket.offAny(handleAnyEvent);
+        socket.off("receiveInvite"); // Remove this listener too
+        socket.off("joinedRoom");
+        socket.off("joinRoom");
+        socket.off("cellSelected");
+      };
+    }
+  }, [socket, toaster]);
+
+  // const handleInvite = (userToInvite: string) => {
+  //   if (socket && localStorage.getItem("username")) {
+  //     console.log('socket id before sending invite from /play', socket.id)
+  //     console.log(`Sending invite to ${userToInvite}`);
+  //     socket.emit("sendInvite", { to: userToInvite }); // Correct event name
+  //     setInviteSent(true);
+  //   }
+  // };
+  const handleAcceptInvite = () => {
+    if (socket && receivedInvite) {
+      console.log("Accepting invite from:", receivedInvite.from);
+      socket.emit("acceptInvite", receivedInvite); // Emit acceptInvite with payload
+    }
+  };
+  const handleJoinRoom = (roomId: string) => {
+    if (socket) {
+      console.log("Joining room", roomId);
+      socket.emit("joinRoom", { roomId });
+    }
+  };
+
+  const handleCellClick = (cell: string) => {
+    if (socket && roomId) {
+      socket.emit("selectCell", cell);
+      console.log("Cell clicked:", cell);
+    }
+  };
+
+  return (
+    <SocketProvider>
+      <Box>
+        <Container maxW="container.xl" centerContent>
+          <VStack rowGap={8} align="center">
+            {/* Show user list if not in a room */}
+
+            {!roomId && (
+              <>
+                <OnlineUsersList
+                  onlineUsers={onlineUsers}
+                  // handleInvite={handleInvite}
+                />
+                {receivedInvite && (
+                  <Button onClick={handleAcceptInvite}>
+                    Accept Invite from {receivedInvite.from}
+                  </Button>
+                )}
+              </>
+            )}
+
+            {/* Conditionally render the rest based on roomId */}
+
+            {roomId ? ( // Only show room details and game if in a room
+              <>
+                <Heading size="md">In Room: {roomId}</Heading>
+                <GameGrid
+                  handleCellClick={handleCellClick}
+                  selectedCells={selectedCells}
+                />
+                <OnlineUsersList
+                  onlineUsers={onlineUsers}
+                  // handleInvite={handleInvite}
+                />{" "}
+                {/* Pass handleInvite */}
+              </>
+            ) : (
+              <Text>Waiting to Create or Join a room...</Text>
+            )}
+          </VStack>
+        </Container>
+      </Box>
+    </SocketProvider>
+  );
+}
+
+
+
 // File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\accordion.tsx
 import { Accordion, HStack } from "@chakra-ui/react"
 import { forwardRef } from "react"
@@ -1484,18 +1667,18 @@ interface OnlineUserProps {
 
 const OnlineUserList: React.FC = () => {
   const { socket } = useContext(SocketContext);
+  console.log("onlineuserslist socket", socket);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const [inviteStatus, setInviteStatus] = useState<string | null>(null);  // State for invite status
-
+  const [inviteStatus, setInviteStatus] = useState<string | null>(null); // State for invite status
 
   const handleInvite = (username: string) => {
-    console.log('handle invite')
+    console.log("handle invite");
     if (socket) {
       // Emit the "sendInvite" event over the socket with the username
-      console.log('socket before sending invite',socket.id)
+      console.log("socket before sending invite", username);
 
-      socket.emit("sendInvite", {to:socket.id});
-      console.log(`Invite sent to ${username}`);
+      socket.emit("sendInvite", { to: username });
+      console.log(`Invite sent successfully from client side to ${username}`);
     }
   };
 
@@ -1509,17 +1692,30 @@ const OnlineUserList: React.FC = () => {
         setOnlineUsers(users);
       });
 
-      socket.on("inviteResponse", (response: { success: boolean, message: string }) => {
-        if (response.success) {
-          setInviteStatus(`Invite sent successfully to ${response.message}`);
-        } else {
-          setInviteStatus(`Failed to send invite: ${response.message}`);
+      socket.on(
+        "inviteResponse",
+        (response: { success: boolean; message: string }) => {
+          if (response.success) {
+            setInviteStatus(`Invite sent successfully to ${response.message}`);
+          } else {
+            setInviteStatus(`Failed to send invite: ${response.message}`);
+          }
         }
-      })
-      const handleAnyEvent = (event: any, ...args:any) => {
+      );
+      socket.on("receiveInvite", (data) => {
+        console.log("pohoch gaye but andar");
+        console.log("Received invite from:", data.from);
+        // setReceivedInvite(data); // Set receivedInvite state
+        // toaster.create({
+        //   title: `Received invite from ${data.from}`,
+        //   type: "info",
+        //   duration: 10000,
+        // });
+      });
+      const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
-    
+
       socket.onAny(handleAnyEvent);
 
       return () => {
@@ -1535,27 +1731,31 @@ const OnlineUserList: React.FC = () => {
   return (
     <Box>
       <VStack rowGap={4} align="center">
-        <Heading as="h2" size="lg">Online Users</Heading>
+        <Heading as="h2" size="lg">
+          Online Users
+        </Heading>
         <VStack rowGap={2} align="start">
-        {onlineUsers.length > 0 ? (
-        onlineUsers.map((user) => (
-          <HStack key={user} justify="space-between" width="100%">
-            {/* Display the username */}
-            <Text>{user}</Text>
-            
-            {/* Invite button */}
-            <Button className="bg-white text-black px-3 py-1" onClick={() => handleInvite(user)}>
-              Invite
-            </Button>
-          </HStack>
-        ))
-      ) : (
-        <Text>No users online</Text>
-      )}
+          {onlineUsers.length > 0 ? (
+            onlineUsers.map((user) => (
+              <HStack key={user} justify="space-between" width="100%">
+                {/* Display the username */}
+                <Text>{user}</Text>
+
+                {/* Invite button */}
+                <Button
+                  className="bg-white text-black px-3 py-1"
+                  onClick={() => handleInvite(user)}
+                >
+                  Invite
+                </Button>
+              </HStack>
+            ))
+          ) : (
+            <Text>No users online</Text>
+          )}
         </VStack>
       </VStack>
     </Box>
-   
   );
 };
 
@@ -2818,8 +3018,9 @@ export const Slider = forwardRef<HTMLDivElement, SliderProps>(
 // File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\SocketProvider.tsx
 // components/SocketProvider.tsx
 "use client";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useEffect, useMemo, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { useRouter } from "next/navigation";
 
 interface SocketContextValue {
   socket: Socket | null;
@@ -2837,6 +3038,8 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
+  const router = useRouter();
+  const isConnected = useRef(false);
 
   const createSocketConnection = (token: string | null) => {
     // Disconnect and clean up any existing socket
@@ -2857,25 +3060,49 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     console.log("newSocket", newSocket);
 
     newSocket.on("connect", () => {
-      console.log("Connected to server");
+      isConnected.current = true;
+      const username = sessionStorage.getItem("username");
+      if (username) {
+        console.log(`Connected to server as ${username}`);
+      } else {
+        console.warn(
+          "Username not found in sessionStorage. Redirecting to login."
+        );
+        // Assuming you have a route '/auth/login':
+        router.push("/auth/login"); // Redirect if no username is found.
+      }
     });
 
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      // Optionally handle connection errors, e.g., display a message to the user, retry connection, etc.
+      if (error.message === "Invalid token provided by user") {
+        // Example: Handle invalid token
+        sessionStorage.removeItem("token"); // Clear invalid token
+        sessionStorage.removeItem("username");
+        router.push("/auth/login"); // Redirect to login
+      }
+    });
     socketRef.current = newSocket;
     setSocket(newSocket);
   };
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    setToken(storedToken); // Set initial token state
+    const storedToken = sessionStorage.getItem("token");
+    if (storedToken) setToken(storedToken); // Set initial token state
 
     createSocketConnection(storedToken); // Create initial connection if token exists
 
     return () => {
-      socket?.disconnect();
-      socketRef.current = null;
-      setSocket(null);
+      if (socketRef.current) {
+        // Check if a socket exists before disconnecting
+        socketRef.current.disconnect();
+        isConnected.current = false; // Reset connected status
+        socketRef.current = null;
+        setSocket(null);
+      }
     };
-  }, []);
+  }, [token, router]);
 
   // Recreate connection when token changes
   useEffect(() => {
@@ -2890,7 +3117,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const newToken = localStorage.getItem("token");
+      const newToken = sessionStorage.getItem("token");
       console.log("newToken", newToken);
 
       setToken(newToken);
@@ -2903,10 +3130,13 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     };
   }, []);
 
+  const value = useMemo(
+    () => ({ socket: socketRef.current }),
+    [socketRef.current]
+  );
+
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current }}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 };
 
@@ -3507,17 +3737,14 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "../../../components/ui/toaster";
-import { Field } from "@/components/ui/field"; 
-import { InputGroup } from "@/components/ui/input-group"; 
+import { Field } from "@/components/ui/field";
+import { InputGroup } from "@/components/ui/input-group";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaUser,FaLock, FaBold } from 'react-icons/fa';
+import { FaUser, FaLock, FaBold } from "react-icons/fa";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { useEffect,useMemo } from 'react';
-
-
-
+import { useEffect, useMemo } from "react";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -3533,7 +3760,7 @@ export default function LoginPage() {
     });
   }, []);
 
-  const particlesLoaded = (container:any) => {
+  const particlesLoaded = (container: any) => {
     console.log(container);
   };
 
@@ -3648,7 +3875,8 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.access_token);
+      sessionStorage.setItem("token", data.access_token);
+      sessionStorage.setItem("username", data.username);
       toaster.create({
         title: "Login successful.",
         description: "You have successfully logged in.",
@@ -3665,7 +3893,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Box 
+    <Box
       className="bg-zinc-800"
       minH="100vh"
       display="flex"
@@ -3674,16 +3902,15 @@ export default function LoginPage() {
       color="white"
       p={8}
     >
-       {init && (
-          <Particles
-          
-            id="tsparticles"
-            particlesLoaded={particlesLoaded}
-            options={particlesOptions}
-          />
-        )}
+      {init && (
+        <Particles
+          id="tsparticles"
+          particlesLoaded={particlesLoaded}
+          options={particlesOptions}
+        />
+      )}
       <Container
-      className="bg-black border-solid border-gray-50"
+        className="bg-black border-solid border-gray-50"
         maxW="md"
         p={6}
         border="1px solid"
@@ -3692,16 +3919,20 @@ export default function LoginPage() {
         boxShadow="lg"
         // Darker gray background for the container
       >
-       
         <Toaster />
-        <Heading as="h1" fontSize="2xl" fontWeight={"bold"} mb={4} textAlign="center">
+        <Heading
+          as="h1"
+          fontSize="2xl"
+          fontWeight={"bold"}
+          mb={4}
+          textAlign="center"
+        >
           Login
         </Heading>
 
         <Box as="form" zIndex={1000} onSubmit={handleSubmit} width="100%">
           <Fieldset.Root size="lg" alignItems={"center"}>
             <Stack rowGap={4}>
-            
               <Fieldset.HelperText textAlign="center">
                 Please provide your login details below.
               </Fieldset.HelperText>
@@ -3709,7 +3940,12 @@ export default function LoginPage() {
 
             <Fieldset.Content>
               <Field label="Username" required>
-              <InputGroup flex="1" width="100%" margin={2} startElement={<FaUser />}>
+                <InputGroup
+                  flex="1"
+                  width="100%"
+                  margin={2}
+                  startElement={<FaUser />}
+                >
                   <Input
                     name="username"
                     type="text"
@@ -3718,36 +3954,42 @@ export default function LoginPage() {
                     placeholder="Enter your username"
                   />
                 </InputGroup>
-
               </Field>
 
               <Field label="Password" required>
-                <InputGroup margin={2} marginBottom={4} flex="1" width="100%" startElement={<FaLock />}>
-                <Input
-                  name="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  bg="transparent" // Dark background for input
-                  borderColor="gray" // Teal border for input
-                  // Lighter teal on focus
-                  placeholder="Enter your password"
-                  color="white"
+                <InputGroup
+                  margin={2}
+                  marginBottom={4}
+                  flex="1"
+                  width="100%"
+                  startElement={<FaLock />}
+                >
+                  <Input
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    bg="transparent" // Dark background for input
+                    borderColor="gray" // Teal border for input
+                    // Lighter teal on focus
+                    placeholder="Enter your password"
+                    color="white"
                   />
-                  </InputGroup>
+                </InputGroup>
               </Field>
             </Fieldset.Content>
 
-            <Button display={"flex"}
-            onClick={handleSubmit}
-          colorScheme="blue"
-          width="40%"
-          padding="6"
-          fontWeight="bold"
-         className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
-        >
-          Login
-        </Button>
+            <Button
+              display={"flex"}
+              onClick={handleSubmit}
+              colorScheme="blue"
+              width="40%"
+              padding="6"
+              fontWeight="bold"
+              className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
+            >
+              Login
+            </Button>
           </Fieldset.Root>
         </Box>
       </Container>
@@ -4035,174 +4277,17 @@ export default function SignUpPage() {
 
 
 // File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\play\page.tsx
-"use client";
-import {
-  Box,
-  Button,
-  Container,
-  Heading,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-// import { io } from "socket.io-client";
-import { useEffect, useState, useContext } from "react";
-import GameGrid from "../../components/ui/Grid";
-import OnlineUsersList from "../../components/ui/OnlineUsersList";
+import { Socket } from "socket.io-client";
 import {
   SocketContext,
   SocketProvider,
 } from "../../components/ui/SocketProvider";
-import { Toaster, toaster } from "@/components/ui/toaster";
+import InsidePlay from "../../components/custom/InsidePlay";
 
 export default function Play() {
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const [roomId, setRoomId] = useState<string | null>(null);
-
-  const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
-    {}
-  );
-  const [inviteSent, setInviteSent] = useState(false); // Track invite status
-  const [receivedInvite, setReceivedInvite] = useState<
-    | {
-        from: string;
-      }
-    | undefined
-  >(undefined);
-
-  const { socket } = useContext(SocketContext);
-  console.log("play page socket", socket);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on("connect", () => {
-        console.log("Connected to server");
-        socket.emit("getOnlineUsers"); // Get initial user list
-      });
-      const handleAnyEvent = (event:any , ...args:any) => {
-        console.log(`Received event: ${event}`, args);
-      };
-    
-      socket.onAny(handleAnyEvent);
-      socket.on("updateUserList", (users: any) => {
-        const otherUsers = users.filter(
-          (user: any) => user !== localStorage.getItem("username")
-        );
-        setOnlineUsers(otherUsers); // Update state with other users
-      });
-      socket.on("joinedRoom", (data) => {
-        setRoomId(data.roomId);
-        console.log("Joined room:", data.roomId);
-      });
-      socket.on("receiveInvite", (data) => {
-        console.log('pohoch gaye')
-        console.log("Received invite from:", data);
-        setReceivedInvite(data); // Set receivedInvite state
-        toaster.create({
-          title: `Received invite from ${data.from}`,
-          type: "info",
-          duration: 10000,
-        });
-      });
-      socket.on("joinedRoom", (data) => {
-        setRoomId(data.roomId);
-        console.log("Joined room:", data.roomId);
-
-        toaster.create({
-          title: 'Joined Room',
-          description: `Room ID :  ${data.roomId}`,
-          type: "info",
-          duration: 9000,
-        });
-      });
-      socket.on("cellSelected", (data: any) => {
-        console.log(`client ${data.username} selected cell ${data.cell}`);
-
-        setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
-      });
-
-      return () => {
-        socket.off("connect");
-        socket.off("updateUserList");
-        socket.offAny(handleAnyEvent);
-        socket.off("receiveInvite"); // Remove this listener too
-        socket.off("joinedRoom");
-        socket.off("cellSelected");
-      };
-    }
-  }, [socket, toaster]);
-
-  // const handleInvite = (userToInvite: string) => {
-  //   if (socket && localStorage.getItem("username")) {
-  //     console.log('socket id before sending invite from /play', socket.id)
-  //     console.log(`Sending invite to ${userToInvite}`);
-  //     socket.emit("sendInvite", { to: userToInvite }); // Correct event name
-  //     setInviteSent(true);
-  //   }
-  // };
-  const handleAcceptInvite = () => {
-    if (socket && receivedInvite) {
-      console.log("Accepting invite from:", receivedInvite.from);
-      socket.emit("acceptInvite", receivedInvite); // Emit acceptInvite with payload
-    }
-  };
-  const handleJoinRoom = (roomId: string) => {
-    if (socket) {
-      console.log("Joining room", roomId);
-      socket.emit("joinRoom", { roomId });
-    }
-  };
-
-
-
-  const handleCellClick = (cell: string) => {
-    if (socket && roomId) {
-      socket.emit("selectCell", cell);
-      console.log("Cell clicked:", cell);
-    }
-  };
-
   return (
     <SocketProvider>
-      <Box>
-        <Container maxW="container.xl" centerContent>
-          <VStack rowGap={8} align="center">
-            {/* Show user list if not in a room */}
-
-            {!roomId && (
-              <>
-                <OnlineUsersList
-                  onlineUsers={onlineUsers}
-                  // handleInvite={handleInvite}
-                />
-                {receivedInvite && (
-                  <Button onClick={handleAcceptInvite}>
-                    Accept Invite from {receivedInvite.from}
-                  </Button>
-                )}
-              </>
-            )}
-
-            {/* Conditionally render the rest based on roomId */}
-
-            {roomId ? ( // Only show room details and game if in a room
-              <>
-                <Heading size="md">In Room: {roomId}</Heading>
-                <GameGrid
-                  handleCellClick={handleCellClick}
-                  selectedCells={selectedCells}
-                />
-                <OnlineUsersList
-                  onlineUsers={onlineUsers}
-                  // handleInvite={handleInvite}
-                />{" "}
-                {/* Pass handleInvite */}
-              </>
-            ) : (
-              <Text>Waiting to Create or Join a room...</Text>
-            )}
-          </VStack>
-        </Container>
-      </Box>
+      <InsidePlay />
     </SocketProvider>
   );
 }
@@ -4379,7 +4464,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} `}>
         {" "}
-        <Provider>{children}</Provider>
+        {/* <SocketProvider> */} {/* Place SocketProvider here */}
+        <Provider>
+          {children} {/* Your app's content */}
+        </Provider>
+        {/* </SocketProvider>{" "} */}
+        {/* Make sure to close the tag */}
       </body>
     </html>
   );

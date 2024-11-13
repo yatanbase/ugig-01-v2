@@ -35,6 +35,7 @@ export default function InsidePlay() {
   >(undefined);
 
   const { socket } = useContext(SocketContext);
+
   console.log("play page socket", socket);
 
   useEffect(() => {
@@ -54,10 +55,10 @@ export default function InsidePlay() {
         );
         setOnlineUsers(otherUsers); // Update state with other users
       });
-      socket.on("joinedRoom", (data) => {
-        setRoomId(data.roomId);
-        console.log("Joined room:", data.roomId);
-      });
+      // socket.on("joinedRoom", (data) => {
+      //   setRoomId(data.roomId);
+      //   console.log("Joined room:", data.roomId);
+      // });
       socket.on("receiveInvite", (data) => {
         console.log("pohoch gaye");
         console.log("Received invite from:", data);
@@ -132,47 +133,45 @@ export default function InsidePlay() {
   };
 
   return (
-    <SocketProvider>
-      <Box>
-        <Container maxW="container.xl" centerContent>
-          <VStack rowGap={8} align="center">
-            {/* Show user list if not in a room */}
+    <Box>
+      <Container maxW="container.xl" centerContent>
+        <VStack rowGap={8} align="center">
+          {/* Show user list if not in a room */}
 
-            {!roomId && (
-              <>
-                <OnlineUsersList
-                  onlineUsers={onlineUsers}
-                  // handleInvite={handleInvite}
-                />
-                {receivedInvite && (
-                  <Button onClick={handleAcceptInvite}>
-                    Accept Invite from {receivedInvite.from}
-                  </Button>
-                )}
-              </>
-            )}
+          {!roomId && (
+            <>
+              <OnlineUsersList
+                onlineUsers={onlineUsers}
+                // handleInvite={handleInvite}
+              />
+              {receivedInvite && (
+                <Button onClick={handleAcceptInvite}>
+                  Accept Invite from {receivedInvite.from}
+                </Button>
+              )}
+            </>
+          )}
 
-            {/* Conditionally render the rest based on roomId */}
+          {/* Conditionally render the rest based on roomId */}
 
-            {roomId ? ( // Only show room details and game if in a room
-              <>
-                <Heading size="md">In Room: {roomId}</Heading>
-                <GameGrid
-                  handleCellClick={handleCellClick}
-                  selectedCells={selectedCells}
-                />
-                <OnlineUsersList
-                  onlineUsers={onlineUsers}
-                  // handleInvite={handleInvite}
-                />{" "}
-                {/* Pass handleInvite */}
-              </>
-            ) : (
-              <Text>Waiting to Create or Join a room...</Text>
-            )}
-          </VStack>
-        </Container>
-      </Box>
-    </SocketProvider>
+          {roomId ? ( // Only show room details and game if in a room
+            <>
+              <Heading size="md">In Room: {roomId}</Heading>
+              <GameGrid
+                handleCellClick={handleCellClick}
+                selectedCells={selectedCells}
+              />
+              <OnlineUsersList
+                onlineUsers={onlineUsers}
+                // handleInvite={handleInvite}
+              />{" "}
+              {/* Pass handleInvite */}
+            </>
+          ) : (
+            <Text>Waiting to Create or Join a room...</Text>
+          )}
+        </VStack>
+      </Container>
+    </Box>
   );
 }

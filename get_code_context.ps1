@@ -76,13 +76,10 @@ if (Test-Path $output_file) {
 
 # List of directories to look for within the 'src' directory
 $directories = @("src/components", "src/pages", "src/app", "src/api", "src/styles", "src/utils", "src/hooks", "src/constants", "src/services", "src/types")
-
 # List of file types to ignore
 $ignore_files = @("*.ico", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg")
-
 # Hash table to keep track of processed files
 $processed_files = @{}
-
 # Function to read files and append their content
 function Read-Files($dir) {
     Get-ChildItem -Path $dir -Recurse | ForEach-Object {
@@ -98,7 +95,10 @@ function Read-Files($dir) {
                     break
                 }
             }
-
+            # Ignore files under 'src/app/components/ui'
+            if ($_.FullName -match [regex]::Escape("src\app\components\ui")) {
+                $should_ignore = $true
+            }
             # If the file should not be ignored and has not been processed yet
             if (-not $should_ignore -and -not $processed_files.ContainsKey($_.FullName)) {
                 # Mark the file as processed
@@ -127,4 +127,4 @@ foreach ($dir in $directories) {
 }
 
 # Output the path of the generated file for confirmation
-Write-Output "The file code_context.txt has been generated at: $output_file"
+Write-Output "The file frontend_code_context.txt has been generated at: $output_file"

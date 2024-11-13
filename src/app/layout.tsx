@@ -21,9 +21,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} `}>
         {" "}
+        {/* <SocketProvider> */} {/* Place SocketProvider here */}
         <Provider>
-          <SocketProvider>{children}</SocketProvider>
+          {children} {/* Your app's content */}
         </Provider>
+        {/* </SocketProvider>{" "} */}
+        {/* Make sure to close the tag */}
       </body>
     </html>
   );
