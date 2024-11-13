@@ -11,6 +11,7 @@ interface OnlineUserProps {
 
 const OnlineUserList: React.FC = () => {
   const { socket } = useContext(SocketContext);
+  console.log("onlineuserslist socket", socket);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [inviteStatus, setInviteStatus] = useState<string | null>(null); // State for invite status
 
@@ -45,6 +46,16 @@ const OnlineUserList: React.FC = () => {
           }
         }
       );
+      socket.on("receiveInvite", (data) => {
+        console.log("pohoch gaye but andar");
+        console.log("Received invite from:", data.from);
+        // setReceivedInvite(data); // Set receivedInvite state
+        // toaster.create({
+        //   title: `Received invite from ${data.from}`,
+        //   type: "info",
+        //   duration: 10000,
+        // });
+      });
       const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
