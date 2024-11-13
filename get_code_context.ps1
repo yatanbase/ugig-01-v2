@@ -67,7 +67,7 @@
 $project_dir = Get-Location
 
 # Use a fixed name for the output file in the current directory
-$output_file = Join-Path $project_dir "code_context.txt"
+$output_file = Join-Path $project_dir "frontend_code_context.txt"
 
 # Check if the output file exists and remove it if it does
 if (Test-Path $output_file) {

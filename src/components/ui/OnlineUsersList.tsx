@@ -12,17 +12,16 @@ interface OnlineUserProps {
 const OnlineUserList: React.FC = () => {
   const { socket } = useContext(SocketContext);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const [inviteStatus, setInviteStatus] = useState<string | null>(null);  // State for invite status
-
+  const [inviteStatus, setInviteStatus] = useState<string | null>(null); // State for invite status
 
   const handleInvite = (username: string) => {
-    console.log('handle invite')
+    console.log("handle invite");
     if (socket) {
       // Emit the "sendInvite" event over the socket with the username
-      console.log('socket before sending invite',socket.id)
+      console.log("socket before sending invite", username);
 
-      socket.emit("sendInvite", {to:socket.id});
-      console.log(`Invite sent to ${username}`);
+      socket.emit("sendInvite", { to: username });
+      console.log(`Invite sent successfully from client side to ${username}`);
     }
   };
 
@@ -36,17 +35,20 @@ const OnlineUserList: React.FC = () => {
         setOnlineUsers(users);
       });
 
-      socket.on("inviteResponse", (response: { success: boolean, message: string }) => {
-        if (response.success) {
-          setInviteStatus(`Invite sent successfully to ${response.message}`);
-        } else {
-          setInviteStatus(`Failed to send invite: ${response.message}`);
+      socket.on(
+        "inviteResponse",
+        (response: { success: boolean; message: string }) => {
+          if (response.success) {
+            setInviteStatus(`Invite sent successfully to ${response.message}`);
+          } else {
+            setInviteStatus(`Failed to send invite: ${response.message}`);
+          }
         }
-      })
-      const handleAnyEvent = (event: any, ...args:any) => {
+      );
+      const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
-    
+
       socket.onAny(handleAnyEvent);
 
       return () => {
@@ -62,27 +64,31 @@ const OnlineUserList: React.FC = () => {
   return (
     <Box>
       <VStack rowGap={4} align="center">
-        <Heading as="h2" size="lg">Online Users</Heading>
+        <Heading as="h2" size="lg">
+          Online Users
+        </Heading>
         <VStack rowGap={2} align="start">
-        {onlineUsers.length > 0 ? (
-        onlineUsers.map((user) => (
-          <HStack key={user} justify="space-between" width="100%">
-            {/* Display the username */}
-            <Text>{user}</Text>
-            
-            {/* Invite button */}
-            <Button className="bg-white text-black px-3 py-1" onClick={() => handleInvite(user)}>
-              Invite
-            </Button>
-          </HStack>
-        ))
-      ) : (
-        <Text>No users online</Text>
-      )}
+          {onlineUsers.length > 0 ? (
+            onlineUsers.map((user) => (
+              <HStack key={user} justify="space-between" width="100%">
+                {/* Display the username */}
+                <Text>{user}</Text>
+
+                {/* Invite button */}
+                <Button
+                  className="bg-white text-black px-3 py-1"
+                  onClick={() => handleInvite(user)}
+                >
+                  Invite
+                </Button>
+              </HStack>
+            ))
+          ) : (
+            <Text>No users online</Text>
+          )}
         </VStack>
       </VStack>
     </Box>
-   
   );
 };
 

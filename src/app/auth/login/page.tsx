@@ -12,17 +12,14 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "../../../components/ui/toaster";
-import { Field } from "@/components/ui/field"; 
-import { InputGroup } from "@/components/ui/input-group"; 
+import { Field } from "@/components/ui/field";
+import { InputGroup } from "@/components/ui/input-group";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaUser,FaLock, FaBold } from 'react-icons/fa';
+import { FaUser, FaLock, FaBold } from "react-icons/fa";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { useEffect,useMemo } from 'react';
-
-
-
+import { useEffect, useMemo } from "react";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -38,7 +35,7 @@ export default function LoginPage() {
     });
   }, []);
 
-  const particlesLoaded = (container:any) => {
+  const particlesLoaded = (container: any) => {
     console.log(container);
   };
 
@@ -153,7 +150,8 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.access_token);
+      sessionStorage.setItem("token", data.access_token);
+      sessionStorage.setItem("username", data.username);
       toaster.create({
         title: "Login successful.",
         description: "You have successfully logged in.",
@@ -170,7 +168,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Box 
+    <Box
       className="bg-zinc-800"
       minH="100vh"
       display="flex"
@@ -179,16 +177,15 @@ export default function LoginPage() {
       color="white"
       p={8}
     >
-       {init && (
-          <Particles
-          
-            id="tsparticles"
-            particlesLoaded={particlesLoaded}
-            options={particlesOptions}
-          />
-        )}
+      {init && (
+        <Particles
+          id="tsparticles"
+          particlesLoaded={particlesLoaded}
+          options={particlesOptions}
+        />
+      )}
       <Container
-      className="bg-black border-solid border-gray-50"
+        className="bg-black border-solid border-gray-50"
         maxW="md"
         p={6}
         border="1px solid"
@@ -197,16 +194,20 @@ export default function LoginPage() {
         boxShadow="lg"
         // Darker gray background for the container
       >
-       
         <Toaster />
-        <Heading as="h1" fontSize="2xl" fontWeight={"bold"} mb={4} textAlign="center">
+        <Heading
+          as="h1"
+          fontSize="2xl"
+          fontWeight={"bold"}
+          mb={4}
+          textAlign="center"
+        >
           Login
         </Heading>
 
         <Box as="form" zIndex={1000} onSubmit={handleSubmit} width="100%">
           <Fieldset.Root size="lg" alignItems={"center"}>
             <Stack rowGap={4}>
-            
               <Fieldset.HelperText textAlign="center">
                 Please provide your login details below.
               </Fieldset.HelperText>
@@ -214,7 +215,12 @@ export default function LoginPage() {
 
             <Fieldset.Content>
               <Field label="Username" required>
-              <InputGroup flex="1" width="100%" margin={2} startElement={<FaUser />}>
+                <InputGroup
+                  flex="1"
+                  width="100%"
+                  margin={2}
+                  startElement={<FaUser />}
+                >
                   <Input
                     name="username"
                     type="text"
@@ -223,36 +229,42 @@ export default function LoginPage() {
                     placeholder="Enter your username"
                   />
                 </InputGroup>
-
               </Field>
 
               <Field label="Password" required>
-                <InputGroup margin={2} marginBottom={4} flex="1" width="100%" startElement={<FaLock />}>
-                <Input
-                  name="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  bg="transparent" // Dark background for input
-                  borderColor="gray" // Teal border for input
-                  // Lighter teal on focus
-                  placeholder="Enter your password"
-                  color="white"
+                <InputGroup
+                  margin={2}
+                  marginBottom={4}
+                  flex="1"
+                  width="100%"
+                  startElement={<FaLock />}
+                >
+                  <Input
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    bg="transparent" // Dark background for input
+                    borderColor="gray" // Teal border for input
+                    // Lighter teal on focus
+                    placeholder="Enter your password"
+                    color="white"
                   />
-                  </InputGroup>
+                </InputGroup>
               </Field>
             </Fieldset.Content>
 
-            <Button display={"flex"}
-            onClick={handleSubmit}
-          colorScheme="blue"
-          width="40%"
-          padding="6"
-          fontWeight="bold"
-         className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
-        >
-          Login
-        </Button>
+            <Button
+              display={"flex"}
+              onClick={handleSubmit}
+              colorScheme="blue"
+              width="40%"
+              padding="6"
+              fontWeight="bold"
+              className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
+            >
+              Login
+            </Button>
           </Fieldset.Root>
         </Box>
       </Container>

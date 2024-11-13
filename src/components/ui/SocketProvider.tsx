@@ -2,6 +2,7 @@
 "use client";
 import { createContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { useRouter } from "next/navigation";
 
 interface SocketContextValue {
   socket: Socket | null;
@@ -19,6 +20,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
+  const router = useRouter();
 
   const createSocketConnection = (token: string | null) => {
     // Disconnect and clean up any existing socket
@@ -39,15 +41,34 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     console.log("newSocket", newSocket);
 
     newSocket.on("connect", () => {
-      console.log("Connected to server");
+      const username = sessionStorage.getItem("username");
+      if (username) {
+        console.log(`Connected to server as ${username}`);
+      } else {
+        console.warn(
+          "Username not found in sessionStorage. Redirecting to login."
+        );
+        // Assuming you have a route '/auth/login':
+        router.push("/auth/login"); // Redirect if no username is found.
+      }
     });
 
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      // Optionally handle connection errors, e.g., display a message to the user, retry connection, etc.
+      if (error.message === "Invalid token provided by user") {
+        // Example: Handle invalid token
+        sessionStorage.removeItem("token"); // Clear invalid token
+        sessionStorage.removeItem("username");
+        router.push("/auth/login"); // Redirect to login
+      }
+    });
     socketRef.current = newSocket;
     setSocket(newSocket);
   };
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    const storedToken = sessionStorage.getItem("token");
     setToken(storedToken); // Set initial token state
 
     createSocketConnection(storedToken); // Create initial connection if token exists
@@ -72,7 +93,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const newToken = localStorage.getItem("token");
+      const newToken = sessionStorage.getItem("token");
       console.log("newToken", newToken);
 
       setToken(newToken);

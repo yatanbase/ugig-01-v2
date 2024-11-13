@@ -1,6 +1,6 @@
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\accordion.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\accordion.tsx
 import { Accordion, HStack } from "@chakra-ui/react"
 import { forwardRef } from "react"
 import { LuChevronDown } from "react-icons/lu"
@@ -51,7 +51,7 @@ export const AccordionItem = Accordion.Item
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\action-bar.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\action-bar.tsx
 import { ActionBar, Portal } from "@chakra-ui/react"
 import { CloseButton } from "./close-button"
 import { forwardRef } from "react"
@@ -95,7 +95,7 @@ export const ActionBarSeparator = ActionBar.Separator
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\alert.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\alert.tsx
 import { Alert as ChakraAlert } from "@chakra-ui/react"
 import { CloseButton } from "./close-button"
 import { forwardRef } from "react"
@@ -150,7 +150,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\avatar.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\avatar.tsx
 "use client"
 
 import type { GroupProps, SlotRecipeProps } from "@chakra-ui/react"
@@ -228,7 +228,7 @@ export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\blockquote.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\blockquote.tsx
 import { Blockquote as ChakraBlockquote } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -263,7 +263,7 @@ export const BlockquoteIcon = ChakraBlockquote.Icon
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\breadcrumb.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\breadcrumb.tsx
 import { Breadcrumb, type SystemStyleObject } from "@chakra-ui/react"
 import { Children, Fragment, forwardRef, isValidElement } from "react"
 
@@ -302,7 +302,7 @@ export const BreadcrumbEllipsis = Breadcrumb.Ellipsis
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\button.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\button.tsx
 import type { ButtonProps as ChakraButtonProps } from "@chakra-ui/react"
 import {
   AbsoluteCenter,
@@ -346,7 +346,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\checkbox-card.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\checkbox-card.tsx
 import { CheckboxCard as ChakraCheckboxCard } from "@chakra-ui/react"
 import { Fragment, forwardRef } from "react"
 
@@ -407,7 +407,7 @@ export const CheckboxCardIndicator = ChakraCheckboxCard.Indicator
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\checkbox.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\checkbox.tsx
 import { Checkbox as ChakraCheckbox } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -436,7 +436,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\clipboard.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\clipboard.tsx
 import type { ButtonProps, InputProps } from "@chakra-ui/react"
 import {
   Button,
@@ -547,7 +547,7 @@ export const ClipboardRoot = ChakraClipboard.Root
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\close-button.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\close-button.tsx
 import type { ButtonProps as ChakraCloseButtonProps } from "@chakra-ui/react"
 import { IconButton as ChakraIconButton } from "@chakra-ui/react"
 import { forwardRef } from "react"
@@ -567,7 +567,7 @@ export const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\color-mode.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\color-mode.tsx
 "use client"
 
 import type { IconButtonProps } from "@chakra-ui/react"
@@ -638,7 +638,7 @@ export const ColorModeButton = forwardRef<
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\data-list.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\data-list.tsx
 import { DataList as ChakraDataList, IconButton } from "@chakra-ui/react"
 import { ToggleTip } from "./toggle-tip"
 import { forwardRef } from "react"
@@ -679,7 +679,7 @@ export const DataListItem = forwardRef<HTMLDivElement, ItemProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\dialog.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\dialog.tsx
 import { Dialog as ChakraDialog, Portal } from "@chakra-ui/react"
 import { CloseButton } from "./close-button"
 import { forwardRef } from "react"
@@ -744,7 +744,7 @@ export const DialogActionTrigger = ChakraDialog.ActionTrigger
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\drawer.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\drawer.tsx
 import { Drawer as ChakraDrawer, Portal } from "@chakra-ui/react"
 import { CloseButton } from "./close-button"
 import { forwardRef } from "react"
@@ -799,7 +799,7 @@ export const DrawerActionTrigger = ChakraDrawer.ActionTrigger
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\empty-state.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\empty-state.tsx
 import { EmptyState as ChakraEmptyState, VStack } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -837,7 +837,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\field.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\field.tsx
 import { Field as ChakraField } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -874,7 +874,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\file-button.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\file-button.tsx
 "use client"
 
 import type { ButtonProps, RecipeProps } from "@chakra-ui/react"
@@ -1044,7 +1044,7 @@ export const FileUploadTrigger = ChakraFileUpload.Trigger
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\Grid.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\Grid.tsx
 // components/ui/Grid.tsx
 "use client";
 import { SimpleGrid, Box } from "@chakra-ui/react";
@@ -1096,7 +1096,7 @@ export default GameGrid;
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\hover-card.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\hover-card.tsx
 import { HoverCard, Portal } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -1135,7 +1135,7 @@ export const HoverCardTrigger = HoverCard.Trigger
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\input-group.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\input-group.tsx
 import type { BoxProps, InputElementProps } from "@chakra-ui/react"
 import { Group, InputElement } from "@chakra-ui/react"
 import { cloneElement, forwardRef } from "react"
@@ -1183,7 +1183,7 @@ export const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\link-button.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\link-button.tsx
 "use client"
 
 import type { HTMLChakraProps, RecipeProps } from "@chakra-ui/react"
@@ -1199,7 +1199,7 @@ export const LinkButton = withContext<HTMLAnchorElement, LinkButtonProps>("a")
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\menu.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\menu.tsx
 "use client"
 
 import { AbsoluteCenter, Menu as ChakraMenu, Portal } from "@chakra-ui/react"
@@ -1311,7 +1311,7 @@ export const MenuTrigger = ChakraMenu.Trigger
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\native-select.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\native-select.tsx
 "use client"
 
 import { NativeSelect as Select } from "@chakra-ui/react"
@@ -1372,11 +1372,11 @@ export const NativeSelectField = forwardRef<
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\Navbar.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\Navbar.tsx
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\number-input.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\number-input.tsx
 import { NumberInput as ChakraNumberInput } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -1403,7 +1403,7 @@ export const NumberInputLabel = ChakraNumberInput.Label
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\OnlineUsers.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\OnlineUsers.tsx
 // components/OnlineUsers.tsx
 "use client";
 
@@ -1470,17 +1470,34 @@ export default OnlineUsers;
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\OnlineUsersList.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\OnlineUsersList.tsx
 // src/components/OnlineUserList.tsx
 "use client";
 import { useEffect, useState, useContext } from "react";
 
-import { Box, VStack, Text, Heading } from "@chakra-ui/react";
+import { Box, VStack, Text, Heading, HStack, Button } from "@chakra-ui/react";
 import { SocketContext } from "../ui/SocketProvider";
+interface OnlineUserProps {
+  onlineUsers: string[];
+  handleInvite: (username: string) => void; // Add handleInvite prop
+}
 
 const OnlineUserList: React.FC = () => {
   const { socket } = useContext(SocketContext);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [inviteStatus, setInviteStatus] = useState<string | null>(null);  // State for invite status
+
+
+  const handleInvite = (username: string) => {
+    console.log('handle invite')
+    if (socket) {
+      // Emit the "sendInvite" event over the socket with the username
+      console.log('socket before sending invite',socket.id)
+
+      socket.emit("sendInvite", {to:socket.id});
+      console.log(`Invite sent to ${username}`);
+    }
+  };
 
   useEffect(() => {
     if (socket) {
@@ -1492,9 +1509,25 @@ const OnlineUserList: React.FC = () => {
         setOnlineUsers(users);
       });
 
+      socket.on("inviteResponse", (response: { success: boolean, message: string }) => {
+        if (response.success) {
+          setInviteStatus(`Invite sent successfully to ${response.message}`);
+        } else {
+          setInviteStatus(`Failed to send invite: ${response.message}`);
+        }
+      })
+      const handleAnyEvent = (event: any, ...args:any) => {
+        console.log(`Received event: ${event}`, args);
+      };
+    
+      socket.onAny(handleAnyEvent);
+
       return () => {
         socket.off("connect");
+        socket.offAny(handleAnyEvent);
+
         socket.off("updateUserList");
+        socket.off("inviteResponse");
       };
     }
   }, [socket]);
@@ -1502,19 +1535,27 @@ const OnlineUserList: React.FC = () => {
   return (
     <Box>
       <VStack rowGap={4} align="center">
-        <Heading as="h2" size="lg">
-          Online Users
-        </Heading>
-
+        <Heading as="h2" size="lg">Online Users</Heading>
         <VStack rowGap={2} align="start">
-          {onlineUsers.length > 0 ? (
-            onlineUsers.map((user) => <Text key={user}>{user}</Text>)
-          ) : (
-            <Text>No users online</Text>
-          )}
+        {onlineUsers.length > 0 ? (
+        onlineUsers.map((user) => (
+          <HStack key={user} justify="space-between" width="100%">
+            {/* Display the username */}
+            <Text>{user}</Text>
+            
+            {/* Invite button */}
+            <Button className="bg-white text-black px-3 py-1" onClick={() => handleInvite(user)}>
+              Invite
+            </Button>
+          </HStack>
+        ))
+      ) : (
+        <Text>No users online</Text>
+      )}
         </VStack>
       </VStack>
     </Box>
+   
   );
 };
 
@@ -1522,7 +1563,7 @@ export default OnlineUserList;
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\pagination.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\pagination.tsx
 "use client"
 
 import type { ButtonProps, TextProps } from "@chakra-ui/react"
@@ -1733,7 +1774,7 @@ export const PaginationPageText = forwardRef<
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\password-input.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\password-input.tsx
 "use client"
 
 import type {
@@ -1884,7 +1925,7 @@ function getColorPalette(percent: number) {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\pin-input.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\pin-input.tsx
 import { PinInput as ChakraPinInput, Group } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -1915,7 +1956,7 @@ export const PinInput = forwardRef<HTMLInputElement, PinInputProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\popover.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\popover.tsx
 import { Popover as ChakraPopover, Portal } from "@chakra-ui/react"
 import { CloseButton } from "./close-button"
 import { forwardRef } from "react"
@@ -1977,7 +2018,7 @@ export const PopoverTrigger = ChakraPopover.Trigger
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\progress-circle.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\progress-circle.tsx
 import type { SystemStyleObject } from "@chakra-ui/react"
 import {
   AbsoluteCenter,
@@ -2018,7 +2059,7 @@ export const ProgressCircleValueText = forwardRef<
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\progress.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\progress.tsx
 import { Progress as ChakraProgress, IconButton } from "@chakra-ui/react"
 import { ToggleTip } from "./toggle-tip"
 import { forwardRef } from "react"
@@ -2062,7 +2103,7 @@ export const ProgressLabel = forwardRef<HTMLDivElement, ProgressLabelProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\prose.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\prose.tsx
 "use client"
 
 import { chakra } from "@chakra-ui/react"
@@ -2330,7 +2371,7 @@ export const Prose = chakra("div", {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\provider.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\provider.tsx
 "use client"
 
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
@@ -2349,7 +2390,7 @@ export function Provider(props: ColorModeProviderProps) {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\radio-card.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\radio-card.tsx
 import { RadioCard } from "@chakra-ui/react"
 import { Fragment, forwardRef } from "react"
 
@@ -2410,7 +2451,7 @@ export const RadioCardItemIndicator = RadioCard.ItemIndicator
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\radio.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\radio.tsx
 import { RadioGroup as ChakraRadioGroup } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -2438,7 +2479,7 @@ export const RadioGroup = ChakraRadioGroup.Root
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\rating.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\rating.tsx
 import { RatingGroup } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -2469,7 +2510,7 @@ export const Rating = forwardRef<HTMLDivElement, RatingProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\segmented-control.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\segmented-control.tsx
 "use client"
 
 import { For, SegmentGroup } from "@chakra-ui/react"
@@ -2520,7 +2561,7 @@ export const SegmentedControl = forwardRef<
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\select.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\select.tsx
 "use client"
 
 import type { CollectionItem } from "@chakra-ui/react"
@@ -2662,7 +2703,7 @@ export const SelectItemText = ChakraSelect.ItemText
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\skeleton.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\skeleton.tsx
 import type {
   SkeletonProps as ChakraSkeletonProps,
   CircleProps,
@@ -2710,7 +2751,7 @@ export const Skeleton = ChakraSkeleton
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\slider.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\slider.tsx
 import { Slider as ChakraSlider, HStack } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -2774,8 +2815,8 @@ export const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\SocketProvider.tsx
-// src/components/ui/SocketProvider.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\SocketProvider.tsx
+// components/SocketProvider.tsx
 "use client";
 import { createContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
@@ -2794,32 +2835,72 @@ interface SocketProviderProps {
 
 const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    console.log("sent token", token);
-
-    if (token && !socketRef.current) {
-      const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`, {
-        extraHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("newSocket", newSocket);
-      socketRef.current = newSocket;
-      setSocket(newSocket);
-
-      newSocket.on("connect", () => {
-        console.log("Connected to server");
-      });
-
-      return () => {
-        newSocket.disconnect();
-        socketRef.current = null;
-        setSocket(null);
-      };
+  const createSocketConnection = (token: string | null) => {
+    // Disconnect and clean up any existing socket
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setSocket(null);
     }
+
+    if (!token) return; // Don't create a connection if there's no token
+
+    const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`, {
+      extraHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("newSocket", newSocket);
+
+    newSocket.on("connect", () => {
+      console.log("Connected to server");
+    });
+
+    socketRef.current = newSocket;
+    setSocket(newSocket);
+  };
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken); // Set initial token state
+
+    createSocketConnection(storedToken); // Create initial connection if token exists
+
+    return () => {
+      socket?.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+    };
+  }, []);
+
+  // Recreate connection when token changes
+  useEffect(() => {
+    createSocketConnection(token); // Create connection (or disconnect if token is null)
+
+    return () => {
+      socket?.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+    };
+  }, [token]);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newToken = localStorage.getItem("token");
+      console.log("newToken", newToken);
+
+      setToken(newToken);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   return (
@@ -2833,7 +2914,7 @@ export { SocketContext, SocketProvider };
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\stat.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\stat.tsx
 import {
   Badge,
   type BadgeProps,
@@ -2912,7 +2993,7 @@ export const StatValueUnit = ChakraStat.ValueUnit
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\status.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\status.tsx
 import type { ColorPalette } from "@chakra-ui/react"
 import { Status as ChakraStatus } from "@chakra-ui/react"
 import { forwardRef } from "react"
@@ -2945,7 +3026,7 @@ export const Status = forwardRef<HTMLDivElement, StatusProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\stepper-input.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\stepper-input.tsx
 import { HStack, IconButton, NumberInput } from "@chakra-ui/react"
 import { forwardRef } from "react"
 import { LuMinus, LuPlus } from "react-icons/lu"
@@ -2998,7 +3079,7 @@ const IncrementTrigger = forwardRef<
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\steps.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\steps.tsx
 import { Box, Steps as ChakraSteps } from "@chakra-ui/react"
 import { LuCheck } from "react-icons/lu"
 
@@ -3081,7 +3162,7 @@ export const StepsPrevTrigger = (props: ChakraSteps.PrevTriggerProps) => {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\switch.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\switch.tsx
 import { Switch as ChakraSwitch } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -3124,7 +3205,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\tag.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\tag.tsx
 import { Tag as ChakraTag } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -3167,7 +3248,7 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\timeline.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\timeline.tsx
 import { Timeline as ChakraTimeline } from "@chakra-ui/react"
 
 export const TimelineRoot = ChakraTimeline.Root
@@ -3188,7 +3269,7 @@ export const TimelineConnector = (props: ChakraTimeline.IndicatorProps) => {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\toaster.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\toaster.tsx
 "use client"
 
 import {
@@ -3235,7 +3316,7 @@ export const Toaster = () => {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\toggle-tip.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\toggle-tip.tsx
 import { Popover as ChakraPopover, IconButton, Portal } from "@chakra-ui/react"
 import { forwardRef } from "react"
 import { HiOutlineInformationCircle } from "react-icons/hi"
@@ -3301,7 +3382,7 @@ export const InfoTip = (props: Partial<ToggleTipProps>) => {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\toggle.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\toggle.tsx
 "use client"
 
 import type { ButtonProps } from "@chakra-ui/react"
@@ -3361,7 +3442,7 @@ export const ToggleIndicator = ChakraToggle.Indicator
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\components\ui\tooltip.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\tooltip.tsx
 import { Tooltip as ChakraTooltip, Portal } from "@chakra-ui/react"
 import { forwardRef } from "react"
 
@@ -3411,7 +3492,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\auth\login\page.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\auth\login\page.tsx
 "use client"; // This is crucial for client-side components
 
 import {
@@ -3423,23 +3504,118 @@ import {
   Input,
   Stack,
   Fieldset,
+  Badge,
 } from "@chakra-ui/react";
-import { Field } from "@/components/ui/field";
-import { InputGroup } from "@/components/ui/input-group";
+import { Toaster, toaster } from "../../../components/ui/toaster";
+import { Field } from "@/components/ui/field"; 
+import { InputGroup } from "@/components/ui/input-group"; 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Import from next/navigation
-import { FaUser, FaLock } from "react-icons/fa";
-import { Toaster, toaster } from "@/components/ui/toaster";
+import { useRouter } from "next/navigation";
+import { FaUser,FaLock, FaBold } from 'react-icons/fa';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import { useEffect,useMemo } from 'react';
+
+
+
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null); // For more specific error display
+  const [error, setError] = useState<string | null>(null);
+  const [init, setInit] = useState(false);
   const router = useRouter();
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
+  const particlesLoaded = (container:any) => {
+    console.log(container);
+  };
+
+  const particlesOptions = useMemo(
+    () => ({
+      background: {
+        color: {
+          value: "#000000",
+        },
+      },
+      fpsLimit: 60,
+      interactivity: {
+        events: {
+          onClick: {
+            enable: true,
+            mode: "push",
+          },
+          onHover: {
+            enable: true,
+            mode: "repulse",
+          },
+          resize: true,
+        },
+        modes: {
+          push: {
+            quantity: 2,
+          },
+          repulse: {
+            distance: 100,
+            duration: 0.2,
+          },
+        },
+      },
+      particles: {
+        color: {
+          value: "#ffffff",
+        },
+        links: {
+          color: "#ffffff",
+          distance: 100,
+          enable: true,
+          opacity: 0.6,
+          width: 0.5,
+        },
+        collisions: {
+          enable: true,
+        },
+        move: {
+          direction: "none",
+          enable: true,
+          outModes: {
+            default: "bounce",
+          },
+          random: false,
+          speed: 1,
+          straight: false,
+        },
+        number: {
+          density: {
+            enable: true,
+            area: 800,
+          },
+          value: 40,
+        },
+        opacity: {
+          value: 0.3,
+        },
+        shape: {
+          type: "circle",
+        },
+        size: {
+          value: { min: 1, max: 3 },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError(null); // Clear previous errors
+    setError(null);
 
     try {
       const response = await fetch(
@@ -3471,18 +3647,15 @@ export default function LoginPage() {
         return;
       }
 
-      // Login successful
       const data = await response.json();
       localStorage.setItem("token", data.access_token);
-      console.log(data);
       toaster.create({
         title: "Login successful.",
         description: "You have successfully logged in.",
         type: "success",
       });
-      router.push("/"); // Redirect using next/navigation
+      router.push("/");
     } catch (error) {
-      // Handle unexpected errors
       setError("An unexpected error occurred.");
       toaster.create({
         title: "An unexpected error occurred.",
@@ -3492,33 +3665,51 @@ export default function LoginPage() {
   };
 
   return (
-    <Container
-      maxW="md"
-      centerContent
-      p={4}
+    <Box 
+      className="bg-zinc-800"
+      minH="100vh"
       display="flex"
       alignItems="center"
       justifyContent="center"
-      minH="100vh"
+      color="white"
+      p={8}
     >
-      <Toaster />
-      <VStack spacing={4} align="center" width="100%">
-        <Heading as="h1" size="lg" mb={4}>
+       {init && (
+          <Particles
+          
+            id="tsparticles"
+            particlesLoaded={particlesLoaded}
+            options={particlesOptions}
+          />
+        )}
+      <Container
+      className="bg-black border-solid border-gray-50"
+        maxW="md"
+        p={6}
+        border="1px solid"
+        borderColor="gray" // Teal border color
+        borderRadius="md"
+        boxShadow="lg"
+        // Darker gray background for the container
+      >
+       
+        <Toaster />
+        <Heading as="h1" fontSize="2xl" fontWeight={"bold"} mb={4} textAlign="center">
           Login
         </Heading>
 
-        <Box as="form" onSubmit={handleSubmit} width="100%">
-          <Fieldset.Root size="lg" maxW="md">
-            <Stack spacing={4}>
-              {/* <Fieldset.Legend>Login</Fieldset.Legend> */}
-              <Fieldset.HelperText>
+        <Box as="form" zIndex={1000} onSubmit={handleSubmit} width="100%">
+          <Fieldset.Root size="lg" alignItems={"center"}>
+            <Stack rowGap={4}>
+            
+              <Fieldset.HelperText textAlign="center">
                 Please provide your login details below.
               </Fieldset.HelperText>
             </Stack>
 
             <Fieldset.Content>
               <Field label="Username" required>
-                <InputGroup flex="1" startElement={<FaUser />}>
+              <InputGroup flex="1" width="100%" margin={2} startElement={<FaUser />}>
                   <Input
                     name="username"
                     type="text"
@@ -3527,47 +3718,52 @@ export default function LoginPage() {
                     placeholder="Enter your username"
                   />
                 </InputGroup>
+
               </Field>
 
               <Field label="Password" required>
-                <InputGroup flex="1" startElement={<FaLock />}>
-                  <Input
-                    name="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                <InputGroup margin={2} marginBottom={4} flex="1" width="100%" startElement={<FaLock />}>
+                <Input
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  bg="transparent" // Dark background for input
+                  borderColor="gray" // Teal border for input
+                  // Lighter teal on focus
+                  placeholder="Enter your password"
+                  color="white"
                   />
-                </InputGroup>
+                  </InputGroup>
               </Field>
             </Fieldset.Content>
 
-            <Button
-              type="submit"
-              alignSelf="flex-start"
-              colorScheme="teal"
-              size="lg"
-              mt={4}
-            >
-              Login
-            </Button>
+            <Button display={"flex"}
+            onClick={handleSubmit}
+          colorScheme="blue"
+          width="40%"
+          padding="6"
+          fontWeight="bold"
+         className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
+        >
+          Login
+        </Button>
           </Fieldset.Root>
         </Box>
-      </VStack>
-    </Container>
+      </Container>
+    </Box>
   );
 }
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\auth\signup\page.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\auth\signup\page.tsx
 "use client"; // This is crucial for client-side components
 
 import {
   Heading,
   Box,
   Button,
-  VStack,
   Container,
   Input,
   Stack,
@@ -3575,17 +3771,17 @@ import {
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "../../../components/ui/toaster";
 import { Field } from "@/components/ui/field";
-import {
-  NativeSelectField,
-  NativeSelectRoot,
-} from "@/components/ui/native-select";
-import { useState } from "react";
+import { useState ,useEffect,useMemo} from "react";
 import { useRouter } from "next/navigation"; // Import from next/navigation
+import { FaUser,FaLock, FaBold } from 'react-icons/fa';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [init, setInit] = useState(false);
   const [error, setError] = useState<string | null>(null); // For more specific error display
   const router = useRouter();
 
@@ -3644,81 +3840,234 @@ export default function SignUpPage() {
     }
   };
 
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
+  const particlesLoaded = (container) => {
+    console.log(container);
+  };
+
+  const particlesOptions = useMemo(
+    () => ({
+      background: {
+        color: {
+          value: "#000000",
+        },
+      },
+      fpsLimit: 60,
+      interactivity: {
+        events: {
+          onClick: {
+            enable: true,
+            mode: "push",
+          },
+          onHover: {
+            enable: true,
+            mode: "repulse",
+          },
+          resize: true,
+        },
+        modes: {
+          push: {
+            quantity: 2,
+          },
+          repulse: {
+            distance: 100,
+            duration: 0.2,
+          },
+        },
+      },
+      particles: {
+        color: {
+          value: "#ffffff",
+        },
+        links: {
+          color: "#ffffff",
+          distance: 100,
+          enable: true,
+          opacity: 0.6,
+          width: 0.5,
+        },
+        collisions: {
+          enable: true,
+        },
+        move: {
+          direction: "none",
+          enable: true,
+          outModes: {
+            default: "bounce",
+          },
+          random: false,
+          speed: 1,
+          straight: false,
+        },
+        number: {
+          density: {
+            enable: true,
+            area: 800,
+          },
+          value: 40,
+        },
+        opacity: {
+          value: 0.3,
+        },
+        shape: {
+          type: "circle",
+        },
+        size: {
+          value: { min: 1, max: 3 },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
+
   return (
-    <Container maxW="md" centerContent p={4}>
-      <Toaster />
-      <Heading as="h1" size="lg" mb={4}>
-        Sign Up
-      </Heading>
+    <Box 
+      className="bg-zinc-800"
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      color="white"
+      p={8}
+    >
+       {init && (
+          <Particles
+          
+            id="tsparticles"
+            particlesLoaded={particlesLoaded}
+            options={particlesOptions}
+          />
+        )}
+      <Container
+        className="bg-black border-solid border-gray-50"
+        maxW="md"
+        p={6}
+        border="1px solid"
+        borderColor="gray"
+        borderRadius="md"
+        boxShadow="lg"
+      >
+        <Toaster />
+        <Heading as="h1" fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
+          Sign Up
+        </Heading>
 
-      <Box as="form" onSubmit={handleSubmit} width="100%">
-        <Fieldset.Root size="lg" maxW="md">
-          <Stack>
-            <Fieldset.Legend>Sign Up</Fieldset.Legend>
-            <Fieldset.HelperText>
-              Please provide your details below.
-            </Fieldset.HelperText>
-          </Stack>
+        <Box as="form" onSubmit={handleSubmit} width="100%">
+          <Fieldset.Root size="lg">
+            <Stack rowGap={4}>
+              <Fieldset.HelperText textAlign="center">
+                
+                Please provide your details below.
+              </Fieldset.HelperText>
+            </Stack>
 
-          <Fieldset.Content>
-            <Field label="Username" required>
-              <Input
-                name="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </Field>
+            <Fieldset.Content>
+              <Field label="Username" required>
+                <Input
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your username"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
 
-            <Field label="Email address" required>
-              <Input
-                name="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Field>
+              <Field label="Email address" required>
+                <Input
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your email"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
 
-            <Field label="Password" required>
-              <Input
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Field>
-          </Fieldset.Content>
+              <Field label="Password" marginBottom={6} required>
+                <Input
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your password"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
+            </Fieldset.Content>
 
-          <Button
-            type="submit"
-            alignSelf="flex-start"
-            colorScheme="teal"
-            size="lg"
-          >
-            Sign Up
-          </Button>
-        </Fieldset.Root>
-      </Box>
-    </Container>
+            <Button
+            onClick={handleSubmit}
+              type="submit"
+              display="flex"
+              colorScheme="blue"
+              width="40%"
+              padding="6"
+              fontWeight="bold"
+              className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
+              alignSelf="center"
+            >
+              Sign Up
+            </Button>
+          </Fieldset.Root>
+        </Box>
+      </Container>
+    </Box>
   );
 }
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\play\page.tsx
-// src/app/play/page.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\play\page.tsx
 "use client";
-import { Box, Container, VStack } from "@chakra-ui/react";
-import { io } from "socket.io-client";
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+// import { io } from "socket.io-client";
 import { useEffect, useState, useContext } from "react";
 import GameGrid from "../../components/ui/Grid";
 import OnlineUsersList from "../../components/ui/OnlineUsersList";
-import { SocketContext } from "../../components/ui/SocketProvider";
+import {
+  SocketContext,
+  SocketProvider,
+} from "../../components/ui/SocketProvider";
+import { Toaster, toaster } from "@/components/ui/toaster";
 
 export default function Play() {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [roomId, setRoomId] = useState<string | null>(null);
+
   const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
     {}
   );
+  const [inviteSent, setInviteSent] = useState(false); // Track invite status
+  const [receivedInvite, setReceivedInvite] = useState<
+    | {
+        from: string;
+      }
+    | undefined
+  >(undefined);
 
   const { socket } = useContext(SocketContext);
   console.log("play page socket", socket);
@@ -3729,13 +4078,44 @@ export default function Play() {
         console.log("Connected to server");
         socket.emit("getOnlineUsers"); // Get initial user list
       });
-
+      const handleAnyEvent = (event:any , ...args:any) => {
+        console.log(`Received event: ${event}`, args);
+      };
+    
+      socket.onAny(handleAnyEvent);
       socket.on("updateUserList", (users: any) => {
-        setOnlineUsers(users);
+        const otherUsers = users.filter(
+          (user: any) => user !== localStorage.getItem("username")
+        );
+        setOnlineUsers(otherUsers); // Update state with other users
       });
+      socket.on("joinedRoom", (data) => {
+        setRoomId(data.roomId);
+        console.log("Joined room:", data.roomId);
+      });
+      socket.on("receiveInvite", (data) => {
+        console.log('pohoch gaye')
+        console.log("Received invite from:", data);
+        setReceivedInvite(data); // Set receivedInvite state
+        toaster.create({
+          title: `Received invite from ${data.from}`,
+          type: "info",
+          duration: 10000,
+        });
+      });
+      socket.on("joinedRoom", (data) => {
+        setRoomId(data.roomId);
+        console.log("Joined room:", data.roomId);
 
+        toaster.create({
+          title: 'Joined Room',
+          description: `Room ID :  ${data.roomId}`,
+          type: "info",
+          duration: 9000,
+        });
+      });
       socket.on("cellSelected", (data: any) => {
-        console.log(`Client ${data.username} selected cell ${data.cell}`);
+        console.log(`client ${data.username} selected cell ${data.cell}`);
 
         setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
       });
@@ -3743,36 +4123,93 @@ export default function Play() {
       return () => {
         socket.off("connect");
         socket.off("updateUserList");
+        socket.offAny(handleAnyEvent);
+        socket.off("receiveInvite"); // Remove this listener too
+        socket.off("joinedRoom");
         socket.off("cellSelected");
       };
     }
-  }, [socket]);
+  }, [socket, toaster]);
+
+  // const handleInvite = (userToInvite: string) => {
+  //   if (socket && localStorage.getItem("username")) {
+  //     console.log('socket id before sending invite from /play', socket.id)
+  //     console.log(`Sending invite to ${userToInvite}`);
+  //     socket.emit("sendInvite", { to: userToInvite }); // Correct event name
+  //     setInviteSent(true);
+  //   }
+  // };
+  const handleAcceptInvite = () => {
+    if (socket && receivedInvite) {
+      console.log("Accepting invite from:", receivedInvite.from);
+      socket.emit("acceptInvite", receivedInvite); // Emit acceptInvite with payload
+    }
+  };
+  const handleJoinRoom = (roomId: string) => {
+    if (socket) {
+      console.log("Joining room", roomId);
+      socket.emit("joinRoom", { roomId });
+    }
+  };
+
+
 
   const handleCellClick = (cell: string) => {
-    if (socket) {
+    if (socket && roomId) {
       socket.emit("selectCell", cell);
       console.log("Cell clicked:", cell);
     }
   };
 
   return (
-    <Box>
-      <Container maxW="container.xl" centerContent>
-        <VStack rowGap={8} align="center">
-          <GameGrid
-            handleCellClick={handleCellClick}
-            selectedCells={selectedCells}
-          />
-          <OnlineUsersList />
-        </VStack>
-      </Container>
-    </Box>
+    <SocketProvider>
+      <Box>
+        <Container maxW="container.xl" centerContent>
+          <VStack rowGap={8} align="center">
+            {/* Show user list if not in a room */}
+
+            {!roomId && (
+              <>
+                <OnlineUsersList
+                  onlineUsers={onlineUsers}
+                  // handleInvite={handleInvite}
+                />
+                {receivedInvite && (
+                  <Button onClick={handleAcceptInvite}>
+                    Accept Invite from {receivedInvite.from}
+                  </Button>
+                )}
+              </>
+            )}
+
+            {/* Conditionally render the rest based on roomId */}
+
+            {roomId ? ( // Only show room details and game if in a room
+              <>
+                <Heading size="md">In Room: {roomId}</Heading>
+                <GameGrid
+                  handleCellClick={handleCellClick}
+                  selectedCells={selectedCells}
+                />
+                <OnlineUsersList
+                  onlineUsers={onlineUsers}
+                  // handleInvite={handleInvite}
+                />{" "}
+                {/* Pass handleInvite */}
+              </>
+            ) : (
+              <Text>Waiting to Create or Join a room...</Text>
+            )}
+          </VStack>
+        </Container>
+      </Box>
+    </SocketProvider>
   );
 }
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\tsparticles\page.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\tsparticles\page.tsx
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -3887,7 +4324,7 @@ export default TestParticles;
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\globals.css
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\globals.css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -3918,7 +4355,7 @@ body {
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\layout.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\layout.tsx
 import type { Metadata } from "next";
 import { Inter, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
@@ -3942,9 +4379,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} `}>
         {" "}
-        <Provider>
-          <SocketProvider>{children}</SocketProvider>
-        </Provider>
+        <Provider>{children}</Provider>
       </body>
     </html>
   );
@@ -3952,7 +4387,7 @@ export default function RootLayout({
 
 
 
-// File: \Wisflux\Internship Assignments\UGIG self draft\ugig-01\src\app\page.tsx
+// File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\page.tsx
 "use client";
 
 import {
@@ -4176,7 +4611,7 @@ export default function Home() {
           mt={12}
         >
           <VStack
-            rowGap={10}
+            rowGap={20}
             align="center"
             css={{
               zIndex: 1000,
@@ -4194,7 +4629,7 @@ export default function Home() {
             <Box
               as={Button}
               className={` bg-gradient-to-r from-gray-700 to-gray-900 px-4 `}
-              size="lg"
+              // size="lg"
               onClick={handleLaunchGame}
               animation="glow 1.5s infinite"
               _hover={{
@@ -4206,7 +4641,7 @@ export default function Home() {
             >
               LAUNCH GAME
             </Box>
-            <OnlineUsers />
+            {/* <OnlineUsers /> */}
           </VStack>
         </Flex>
       </Container>
