@@ -26,6 +26,7 @@ export default function InsidePlay() {
   const [isSelector, setIsSelector] = useState(false);
   const [isPredictor, setIsPredictor] = useState(false);
   const [isPredictionEnabled, setIsPredictionEnabled] = useState(false);
+  const [disabledCells, setDisabledCells] = useState<string[]>([]);
 
   const [currentTurn, setCurrentTurn] = useState<{
     selector: string | null;
@@ -76,6 +77,12 @@ export default function InsidePlay() {
           "isPredictor:",
           isPredictor
         );
+      });
+      socket.on("updateDisalbedCells", (data: any) => {
+        console.log("updating disabled cells", data);
+        if (data.gameId === gameId) {
+          setDisabledCells(data.disabledCells);
+        }
       });
       socket.on("enablePrediction", (data: any) => {
         const username = sessionStorage.getItem("username");
@@ -155,6 +162,7 @@ export default function InsidePlay() {
         socket.off("enablePrediction");
         socket.off("cellPredicted");
         socket.off("cellSelected");
+        socket.off("updateDisalbedCells");
       };
     }
   }, [socket, toaster]);
@@ -227,6 +235,7 @@ export default function InsidePlay() {
                 selectedCells={selectedCells}
                 isSelector={isSelector}
                 isPredictor={isPredictor}
+                disabledCells={disabledCells}
                 isPredictionEnabled={isPredictionEnabled}
                 gameId={gameId}
               />

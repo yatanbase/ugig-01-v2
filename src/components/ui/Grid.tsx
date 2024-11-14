@@ -9,6 +9,7 @@ interface GameGridProps {
   selectedCells: Record<string, string>;
   isSelector: boolean;
   isPredictor: boolean;
+  disabledCells: string[];
   isPredictionEnabled: boolean;
   gameId: number;
 }
@@ -18,6 +19,7 @@ const GameGrid: React.FC<GameGridProps> = ({
   selectedCells,
   isSelector,
   isPredictor,
+  disabledCells,
   isPredictionEnabled,
   gameId,
 }) => {
@@ -25,7 +27,9 @@ const GameGrid: React.FC<GameGridProps> = ({
   useEffect(() => {
     console.log("isSelector: ", isSelector);
     console.log("isPredictor: ", isPredictor);
-  }, [isSelector, isPredictor]);
+    console.log("disabledCells: ", disabledCells);
+    console.log("isPredictionEnabled: ", isPredictionEnabled);
+  }, [isSelector, isPredictor, disabledCells, isPredictionEnabled]);
   return (
     <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}>
       <Toaster />
@@ -56,24 +60,26 @@ const GameGrid: React.FC<GameGridProps> = ({
             justifyContent="center"
             borderRadius="md"
             cursor={
-              (isSelector && !isPredictionEnabled) ||
-              (isPredictor && isPredictionEnabled)
-                ? "pointer"
-                : "not-allowed"
+              disabledCells.includes(cell) ||
+              (!isSelector && !isPredictionEnabled) ||
+              (isPredictor && !isPredictionEnabled)
+                ? "not-allowed"
+                : "pointer"
             }
             _hover={{ bg: "gray.300" }}
             onClick={() => {
               if (
-                (isSelector && !isPredictionEnabled) ||
-                (isPredictor && isPredictionEnabled)
+                disabledCells.includes(cell) ||
+                (!isSelector && !isPredictionEnabled) ||
+                (isPredictor && !isPredictionEnabled)
               ) {
-                handleCellClick(cell);
-              } else {
                 toaster.create({
                   type: "warning",
                   title: "not ur move mate!",
                   duration: 2000,
                 });
+              } else {
+                handleCellClick(cell);
               }
             }}
           >
