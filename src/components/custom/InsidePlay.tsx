@@ -64,9 +64,15 @@ export default function InsidePlay() {
         const username = sessionStorage.getItem("username");
 
         setCurrentTurn(data);
-
+        setGameId(data.gameId);
         setIsSelector(data.selector === username);
         setIsPredictor(data.predictor === username);
+        console.log(
+          "[InsidePlay] isSelector:",
+          isSelector,
+          "isPredictor:",
+          isPredictor
+        );
       });
 
       const handleAnyEvent = (event: any, ...args: any) => {
@@ -111,7 +117,7 @@ export default function InsidePlay() {
           title: "Joined Room",
           description: `Room ID :  ${data.roomId}`,
           type: "info",
-          duration: 9000,
+          duration: 5000,
         });
       });
       socket.on("cellSelected", (data: any) => {
@@ -164,6 +170,7 @@ export default function InsidePlay() {
   return (
     <Box>
       <Container maxW="container.xl" centerContent>
+        <Toaster />
         <VStack rowGap={8} align="center">
           {/* Show user list if not in a room */}
 
@@ -194,6 +201,9 @@ export default function InsidePlay() {
               <GameGrid
                 handleCellClick={handleCellClick}
                 selectedCells={selectedCells}
+                isSelector={isSelector}
+                isPredictor={isPredictor}
+                gameId={gameId}
               />
               {/* Example: Conditionally render a button only for the selector */}
               {isSelector && (
