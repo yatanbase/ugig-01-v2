@@ -47,6 +47,9 @@ export default function InsidePlay() {
         console.log("Connected to server");
         socket.emit("getOnlineUsers"); // Get initial user list
       });
+      socket.on("updateUserList", (users: any) => {
+        setOnlineUsers(users);
+      });
       const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
@@ -58,10 +61,10 @@ export default function InsidePlay() {
         );
         setOnlineUsers(otherUsers); // Update state with other users
       });
-      socket.on("joinedRoom", (data) => {
-        setRoomId(data.roomId);
-        console.log("Joined room:", data.roomId);
-      });
+      // socket.on("joinedRoom", (data) => {
+      //   setRoomId(data.roomId);
+      //   console.log("Joined room:", data.roomId);
+      // });
       socket.on("receiveInvite", (data) => {
         console.log("pohoch gaye");
         console.log("Received invite from:", data);
@@ -130,54 +133,53 @@ export default function InsidePlay() {
 
   const handleCellClick = (cell: string) => {
     if (socket && roomId) {
-      socket.emit("selectCell", cell);
-      console.log("Cell clicked:", cell);
+      socket.emit("selectCell", { cell, roomId });
+      console.log("Cell clicked and emitted from client:", cell);
     }
   };
 
   return (
-    <SocketProvider>
-      <Box>
-        <Container maxW="container.xl" centerContent>
-          <VStack rowGap={8} align="center">
-            {/* Show user list if not in a room */}
+    <Box>
+      <Container maxW="container.xl" centerContent>
+        <VStack rowGap={8} align="center">
+          {/* Show user list if not in a room */}
 
-            {!roomId && (
-              <>
-                <OnlineUsersList
-                  onlineUsers={onlineUsers}
-                  // handleInvite={handleInvite}
-                />
-                {receivedInvite && (
-                  <Button onClick={handleAcceptInvite}>
-                    Accept Invite from {receivedInvite.from}
-                  </Button>
-                )}
-              </>
-            )}
+          {!roomId && (
+            <>
+              <OnlineUsersList
+                onlineUsers={onlineUsers}
+                // handleInvite={handleInvite}
+              />
+              {receivedInvite && (
+                <Button onClick={handleAcceptInvite}>
+                  Accept Invite from {receivedInvite.from}
+                </Button>
+              )}
+            </>
+          )}
 
-            {/* Conditionally render the rest based on roomId */}
+          {/* Conditionally render the rest based on roomId */}
 
-            {roomId ? ( // Only show room details and game if in a room
-              <>
-                <Heading size="md">In Room: {roomId}</Heading>
-                <GameGrid
-                  handleCellClick={handleCellClick}
-                  selectedCells={selectedCells}
-                />
-                <OnlineUsersList
-                  onlineUsers={onlineUsers}
-                  // handleInvite={handleInvite}
-                />{" "}
-                {/* Pass handleInvite */}
-              </>
-            ) : (
-              <Text>Waiting to Create or Join a room...</Text>
-            )}
-          </VStack>
-        </Container>
-      </Box>
-    </SocketProvider>
+          {roomId ? ( // Only show room details and game if in a room
+            <>
+              <Heading size="md">In Room: {roomId}</Heading>
+              <GameGrid
+                handleCellClick={handleCellClick}
+                selectedCells={selectedCells}
+              />
+              <OnlineUsersList
+                onlineUsers={onlineUsers}
+
+                // handleInvite={handleInvite}
+              />{" "}
+              {/* Pass handleInvite */}
+            </>
+          ) : (
+            <Text>Waiting to Create or Join a room...</Text>
+          )}
+        </VStack>
+      </Container>
+    </Box>
   );
 }
 
@@ -1662,13 +1664,13 @@ import { Box, VStack, Text, Heading, HStack, Button } from "@chakra-ui/react";
 import { SocketContext } from "../ui/SocketProvider";
 interface OnlineUserProps {
   onlineUsers: string[];
-  handleInvite: (username: string) => void; // Add handleInvite prop
+  // handleInvite: (username: string) => void; // Add handleInvite prop
 }
 
-const OnlineUserList: React.FC = () => {
+const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
   const { socket } = useContext(SocketContext);
   console.log("onlineuserslist socket", socket);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  // const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [inviteStatus, setInviteStatus] = useState<string | null>(null); // State for invite status
 
   const handleInvite = (username: string) => {
@@ -1684,13 +1686,13 @@ const OnlineUserList: React.FC = () => {
 
   useEffect(() => {
     if (socket) {
-      socket.on("connect", () => {
-        socket.emit("getOnlineUsers"); // Get initial user list
-      });
+      // socket.on("connect", () => {
+      //   socket.emit("getOnlineUsers"); // Get initial user list
+      // });
 
-      socket.on("updateUserList", (users: any) => {
-        setOnlineUsers(users);
-      });
+      // socket.on("updateUserList", (users: any) => {
+      //   setOnlineUsers(users);
+      // });
 
       socket.on(
         "inviteResponse",
@@ -1743,7 +1745,12 @@ const OnlineUserList: React.FC = () => {
 
                 {/* Invite button */}
                 <Button
-                  className="bg-white text-black px-3 py-1"
+                  disabled={user === sessionStorage.getItem("username")}
+                  className={`px-3 py-1 ${
+                    user === sessionStorage.getItem("username")
+                      ? "bg-gray-400 text-white"
+                      : "bg-white text-black"
+                  }`}
                   onClick={() => handleInvite(user)}
                 >
                   Invite
@@ -3036,99 +3043,59 @@ interface SocketProviderProps {
 
 const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const router = useRouter();
   const isConnected = useRef(false);
 
-  const createSocketConnection = (token: string | null) => {
-    // Disconnect and clean up any existing socket
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-      socketRef.current = null;
-      setSocket(null);
+  useEffect(() => {
+    // Main useEffect for connection setup and cleanup
+    const storedToken = sessionStorage.getItem("token");
+
+    if (storedToken && !isConnected.current) {
+      // Only connect if not already connected
+      const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`, {
+        extraHeaders: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+
+      newSocket.on("connect", () => {
+        isConnected.current = true; // Set connected AFTER successful connection
+        const username = sessionStorage.getItem("username");
+        if (username) {
+          console.log(`Connected to server as ${username}`);
+        } else {
+          console.warn(
+            "Username not found in sessionStorage. Redirecting to login."
+          );
+          router.push("/auth/login"); // Redirect if no username is found.
+        }
+      });
+
+      newSocket.on("connect_error", (error) => {
+        console.error("Socket connection error:", error);
+        if (error.message === "Invalid token provided by user") {
+          sessionStorage.removeItem("token");
+          sessionStorage.removeItem("username");
+          router.push("/auth/login");
+        }
+      });
+
+      socketRef.current = newSocket;
+      setSocket(newSocket);
     }
 
-    if (!token) return; // Don't create a connection if there's no token
-
-    const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/game`, {
-      extraHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("newSocket", newSocket);
-
-    newSocket.on("connect", () => {
-      isConnected.current = true;
-      const username = sessionStorage.getItem("username");
-      if (username) {
-        console.log(`Connected to server as ${username}`);
-      } else {
-        console.warn(
-          "Username not found in sessionStorage. Redirecting to login."
-        );
-        // Assuming you have a route '/auth/login':
-        router.push("/auth/login"); // Redirect if no username is found.
-      }
-    });
-
-    newSocket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      // Optionally handle connection errors, e.g., display a message to the user, retry connection, etc.
-      if (error.message === "Invalid token provided by user") {
-        // Example: Handle invalid token
-        sessionStorage.removeItem("token"); // Clear invalid token
-        sessionStorage.removeItem("username");
-        router.push("/auth/login"); // Redirect to login
-      }
-    });
-    socketRef.current = newSocket;
-    setSocket(newSocket);
-  };
-
-  useEffect(() => {
-    const storedToken = sessionStorage.getItem("token");
-    if (storedToken) setToken(storedToken); // Set initial token state
-
-    createSocketConnection(storedToken); // Create initial connection if token exists
-
     return () => {
+      // Cleanup function
       if (socketRef.current) {
-        // Check if a socket exists before disconnecting
+        // Only disconnect if connected
         socketRef.current.disconnect();
-        isConnected.current = false; // Reset connected status
+        isConnected.current = false;
         socketRef.current = null;
         setSocket(null);
       }
     };
-  }, [token, router]);
-
-  // Recreate connection when token changes
-  useEffect(() => {
-    createSocketConnection(token); // Create connection (or disconnect if token is null)
-
-    return () => {
-      socket?.disconnect();
-      socketRef.current = null;
-      setSocket(null);
-    };
-  }, [token]);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const newToken = sessionStorage.getItem("token");
-      console.log("newToken", newToken);
-
-      setToken(newToken);
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
+  }, [router]); // Only re-run if the router changes
 
   const value = useMemo(
     () => ({ socket: socketRef.current }),
@@ -3141,6 +3108,31 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
 };
 
 export { SocketContext, SocketProvider };
+
+//  useEffect(() => {
+//    createSocketConnection(token); // Create connection (or disconnect if token is null)
+
+//    return () => {
+//      socket?.disconnect();
+//      socketRef.current = null;
+//      setSocket(null);
+//    };
+//  }, [token]);
+
+//  useEffect(() => {
+//    const handleStorageChange = () => {
+//      const newToken = sessionStorage.getItem("token");
+//      console.log("newToken", newToken);
+
+//      setToken(newToken);
+//    };
+
+//    window.addEventListener("storage", handleStorageChange);
+
+//    return () => {
+//      window.removeEventListener("storage", handleStorageChange);
+//    };
+//  }, []);
 
 
 

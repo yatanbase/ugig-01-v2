@@ -16,10 +16,20 @@ import {
   SocketContext,
   SocketProvider,
 } from "../../components/ui/SocketProvider";
+import { useRouter } from "next/navigation";
 
 import { Toaster, toaster } from "@/components/ui/toaster";
 
 export default function InsidePlay() {
+  const router = useRouter();
+  const [gameId, setGameId] = useState<number | null>(null);
+  const [isSelector, setIsSelector] = useState(false);
+  const [isPredictor, setIsPredictor] = useState(false);
+  const [currentTurn, setCurrentTurn] = useState<{
+    selector: string | null;
+    predictor: string | null;
+  }>({ selector: null, predictor: null });
+
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [roomId, setRoomId] = useState<string | null>(null);
 
@@ -47,6 +57,18 @@ export default function InsidePlay() {
       socket.on("updateUserList", (users: any) => {
         setOnlineUsers(users);
       });
+      socket.on("turn", (data: any) => {
+        // Listen for 'turn' event
+
+        console.log("data in on turn event client", data);
+        const username = sessionStorage.getItem("username");
+
+        setCurrentTurn(data);
+
+        setIsSelector(data.selector === username);
+        setIsPredictor(data.predictor === username);
+      });
+
       const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
@@ -76,11 +98,14 @@ export default function InsidePlay() {
       socket.on("joinRoom", (data) => {
         console.log("Joining room:", data.roomId);
         setRoomId(data.roomId); // Update roomId state
+        setGameId(data.gameId);
         handleJoinRoom(data.roomId); // Call handleJoinRoom to join the room on the frontend
       });
       socket.on("joinedRoom", (data) => {
         setRoomId(data.roomId);
-        console.log("Joined room:", data.roomId);
+        setGameId(data.gameId);
+
+        console.log("Joined room:", data.roomId, "gameId:", data.gameId);
 
         toaster.create({
           title: "Joined Room",
@@ -130,7 +155,8 @@ export default function InsidePlay() {
 
   const handleCellClick = (cell: string) => {
     if (socket && roomId) {
-      socket.emit("selectCell", { cell, roomId });
+      const username = sessionStorage.getItem("username");
+      socket.emit("selectCell", { cell, roomId, username });
       console.log("Cell clicked and emitted from client:", cell);
     }
   };
@@ -148,7 +174,10 @@ export default function InsidePlay() {
                 // handleInvite={handleInvite}
               />
               {receivedInvite && (
-                <Button onClick={handleAcceptInvite}>
+                <Button
+                  className={`px-3 py-1 ${"bg-white text-black"}`}
+                  onClick={handleAcceptInvite}
+                >
                   Accept Invite from {receivedInvite.from}
                 </Button>
               )}
@@ -157,15 +186,30 @@ export default function InsidePlay() {
 
           {/* Conditionally render the rest based on roomId */}
 
-          {roomId ? ( // Only show room details and game if in a room
+          {roomId && gameId ? ( // Only show room details and game if in a room
             <>
-              <Heading size="md">In Room: {roomId}</Heading>
+              <Heading size="md">
+                In Room: {roomId}, Game ID: {gameId}
+              </Heading>
               <GameGrid
                 handleCellClick={handleCellClick}
                 selectedCells={selectedCells}
-                roomId={roomId}
-                setRoomId={setRoomId}
               />
+              {/* Example: Conditionally render a button only for the selector */}
+              {isSelector && (
+                <Button className={`px-3 py-1 ${"bg-white text-black"}`}>
+                  Select a cell
+                </Button>
+              )}
+              {/* Example: Display a message for the predictor */}
+              {isPredictor && (
+                <p className={`px-3 py-1 ${"bg-white text-black"}`}>
+                  Waiting for selector...
+                </p>
+              )}
+              <Text>
+                temporarily diplaying participants with the same copmponent
+              </Text>
               <OnlineUsersList
                 onlineUsers={onlineUsers}
 
