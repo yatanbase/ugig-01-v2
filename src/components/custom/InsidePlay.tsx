@@ -25,6 +25,8 @@ export default function InsidePlay() {
   const [gameId, setGameId] = useState<number | null>(null);
   const [isSelector, setIsSelector] = useState(false);
   const [isPredictor, setIsPredictor] = useState(false);
+  const [isPredictionEnabled, setIsPredictionEnabled] = useState(false);
+
   const [currentTurn, setCurrentTurn] = useState<{
     selector: string | null;
     predictor: string | null;
@@ -32,7 +34,7 @@ export default function InsidePlay() {
 
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [roomId, setRoomId] = useState<string | null>(null);
-
+  const [selectedCell, setSelectedCell] = useState<string | null>(null);
   const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
     {}
   );
@@ -67,12 +69,22 @@ export default function InsidePlay() {
         setGameId(data.gameId);
         setIsSelector(data.selector === username);
         setIsPredictor(data.predictor === username);
+        setIsPredictionEnabled(false);
         console.log(
           "[InsidePlay] isSelector:",
           isSelector,
           "isPredictor:",
           isPredictor
         );
+      });
+      socket.on("enablePrediction", (data: any) => {
+        const username = sessionStorage.getItem("username");
+        setIsPredictionEnabled(true);
+        console.log("Prediction enabled for:", username);
+        setSelectedCells((prev) => ({
+          ...prev,
+          [data.cell]: data.selector,
+        }));
       });
 
       const handleAnyEvent = (event: any, ...args: any) => {
@@ -125,7 +137,13 @@ export default function InsidePlay() {
 
         setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
       });
-
+      socket.on("cellPredicted", (data: any) => {
+        setSelectedCells((prev) => ({
+          ...prev,
+          [data.cell]: data.username,
+        }));
+        setIsPredictionEnabled(false);
+      });
       return () => {
         socket.off("connect");
         socket.off("updateUserList");
@@ -133,6 +151,9 @@ export default function InsidePlay() {
         socket.off("receiveInvite"); // Remove this listener too
         socket.off("joinedRoom");
         socket.off("joinRoom");
+        socket.off("turn");
+        socket.off("enablePrediction");
+        socket.off("cellPredicted");
         socket.off("cellSelected");
       };
     }
@@ -162,8 +183,11 @@ export default function InsidePlay() {
   const handleCellClick = (cell: string) => {
     if (socket && roomId) {
       const username = sessionStorage.getItem("username");
-      socket.emit("selectCell", { cell, roomId, username });
-      console.log("Cell clicked and emitted from client:", cell);
+      if (isSelector && !isPredictionEnabled) {
+        socket.emit("selectCell", { cell, roomId, username });
+      } else if (isPredictor && isPredictionEnabled) {
+        socket.emit("predictCell", { cell, roomId, username });
+      }
     }
   };
 
@@ -203,6 +227,7 @@ export default function InsidePlay() {
                 selectedCells={selectedCells}
                 isSelector={isSelector}
                 isPredictor={isPredictor}
+                isPredictionEnabled={isPredictionEnabled}
                 gameId={gameId}
               />
               {/* Example: Conditionally render a button only for the selector */}
@@ -212,7 +237,7 @@ export default function InsidePlay() {
                 </Button>
               )}
               {/* Example: Display a message for the predictor */}
-              {isPredictor && (
+              {isPredictor && !isPredictionEnabled && (
                 <p className={`px-3 py-1 ${"bg-white text-black"}`}>
                   Waiting for selector...
                 </p>
