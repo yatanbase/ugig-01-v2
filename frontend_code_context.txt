@@ -19,13 +19,26 @@ import {
   SocketContext,
   SocketProvider,
 } from "../../components/ui/SocketProvider";
+import { useRouter } from "next/navigation";
 
 import { Toaster, toaster } from "@/components/ui/toaster";
 
 export default function InsidePlay() {
+  const router = useRouter();
+  const [gameId, setGameId] = useState<number | null>(null);
+  const [isSelector, setIsSelector] = useState(false);
+  const [isPredictor, setIsPredictor] = useState(false);
+  const [isPredictionEnabled, setIsPredictionEnabled] = useState(false);
+  const [disabledCells, setDisabledCells] = useState<string[]>([]);
+
+  const [currentTurn, setCurrentTurn] = useState<{
+    selector: string | null;
+    predictor: string | null;
+  }>({ selector: null, predictor: null });
+
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [roomId, setRoomId] = useState<string | null>(null);
-
+  const [selectedCell, setSelectedCell] = useState<string | null>(null);
   const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
     {}
   );
@@ -40,6 +53,9 @@ export default function InsidePlay() {
   const { socket } = useContext(SocketContext);
 
   console.log("play page socket", socket);
+  useEffect(() => {
+    console.log("disabledCells", disabledCells);
+  }, [disabledCells]);
 
   useEffect(() => {
     if (socket) {
@@ -50,6 +66,40 @@ export default function InsidePlay() {
       socket.on("updateUserList", (users: any) => {
         setOnlineUsers(users);
       });
+      socket.on("turn", (data: any) => {
+        // Listen for 'turn' event
+
+        console.log("data in on turn event client", data);
+        const username = sessionStorage.getItem("username");
+
+        setCurrentTurn(data);
+        setGameId(data.gameId);
+        setIsSelector(data.selector === username);
+        setIsPredictor(data.predictor === username);
+        setIsPredictionEnabled(false);
+        console.log(
+          "[InsidePlay] isSelector:",
+          isSelector,
+          "isPredictor:",
+          isPredictor
+        );
+        setDisabledCells(data.disabledCells);
+      });
+      socket.on("updateDisabledCells", (data: any) => {
+        console.log("updating disabled cells", data);
+
+        setDisabledCells(data.disabledCells);
+      });
+      socket.on("enablePrediction", (data: any) => {
+        const username = sessionStorage.getItem("username");
+        setIsPredictionEnabled(true);
+        console.log("Prediction enabled for:", username);
+        setSelectedCells((prev) => ({
+          ...prev,
+          [data.cell]: data.selector,
+        }));
+      });
+
       const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
@@ -79,17 +129,20 @@ export default function InsidePlay() {
       socket.on("joinRoom", (data) => {
         console.log("Joining room:", data.roomId);
         setRoomId(data.roomId); // Update roomId state
+        setGameId(data.gameId);
         handleJoinRoom(data.roomId); // Call handleJoinRoom to join the room on the frontend
       });
       socket.on("joinedRoom", (data) => {
         setRoomId(data.roomId);
-        console.log("Joined room:", data.roomId);
+        setGameId(data.gameId);
+
+        console.log("Joined room:", data.roomId, "gameId:", data.gameId);
 
         toaster.create({
           title: "Joined Room",
           description: `Room ID :  ${data.roomId}`,
           type: "info",
-          duration: 9000,
+          duration: 5000,
         });
       });
       socket.on("cellSelected", (data: any) => {
@@ -97,7 +150,13 @@ export default function InsidePlay() {
 
         setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
       });
-
+      socket.on("cellPredicted", (data: any) => {
+        setSelectedCells((prev) => ({
+          ...prev,
+          [data.cell]: data.username,
+        }));
+        setIsPredictionEnabled(false);
+      });
       return () => {
         socket.off("connect");
         socket.off("updateUserList");
@@ -105,7 +164,11 @@ export default function InsidePlay() {
         socket.off("receiveInvite"); // Remove this listener too
         socket.off("joinedRoom");
         socket.off("joinRoom");
+        socket.off("turn");
+        socket.off("enablePrediction");
+        socket.off("cellPredicted");
         socket.off("cellSelected");
+        socket.off("updateDisabledCells");
       };
     }
   }, [socket, toaster]);
@@ -133,14 +196,19 @@ export default function InsidePlay() {
 
   const handleCellClick = (cell: string) => {
     if (socket && roomId) {
-      socket.emit("selectCell", { cell, roomId });
-      console.log("Cell clicked and emitted from client:", cell);
+      const username = sessionStorage.getItem("username");
+      if (isSelector && !isPredictionEnabled) {
+        socket.emit("selectCell", { cell, roomId, username });
+      } else if (isPredictor && isPredictionEnabled) {
+        socket.emit("predictCell", { cell, roomId, username });
+      }
     }
   };
 
   return (
     <Box>
       <Container maxW="container.xl" centerContent>
+        <Toaster />
         <VStack rowGap={8} align="center">
           {/* Show user list if not in a room */}
 
@@ -151,7 +219,10 @@ export default function InsidePlay() {
                 // handleInvite={handleInvite}
               />
               {receivedInvite && (
-                <Button onClick={handleAcceptInvite}>
+                <Button
+                  className={`px-3 py-1 ${"bg-white text-black"}`}
+                  onClick={handleAcceptInvite}
+                >
                   Accept Invite from {receivedInvite.from}
                 </Button>
               )}
@@ -160,13 +231,35 @@ export default function InsidePlay() {
 
           {/* Conditionally render the rest based on roomId */}
 
-          {roomId ? ( // Only show room details and game if in a room
+          {roomId && gameId ? ( // Only show room details and game if in a room
             <>
-              <Heading size="md">In Room: {roomId}</Heading>
+              <Heading size="md">
+                In Room: {roomId}, Game ID: {gameId}
+              </Heading>
               <GameGrid
                 handleCellClick={handleCellClick}
                 selectedCells={selectedCells}
+                isSelector={isSelector}
+                isPredictor={isPredictor}
+                disabledCells={disabledCells}
+                isPredictionEnabled={isPredictionEnabled}
+                gameId={gameId}
               />
+              {/* Example: Conditionally render a button only for the selector */}
+              {isSelector && (
+                <Button className={`px-3 py-1 ${"bg-white text-black"}`}>
+                  Select a cell
+                </Button>
+              )}
+              {/* Example: Display a message for the predictor */}
+              {isPredictor && !isPredictionEnabled && (
+                <p className={`px-3 py-1 ${"bg-white text-black"}`}>
+                  Waiting for selector...
+                </p>
+              )}
+              <Text>
+                temporarily diplaying participants with the same copmponent
+              </Text>
               <OnlineUsersList
                 onlineUsers={onlineUsers}
 
@@ -1233,42 +1326,89 @@ export const FileUploadTrigger = ChakraFileUpload.Trigger
 // components/ui/Grid.tsx
 "use client";
 import { SimpleGrid, Box } from "@chakra-ui/react";
+import { Toaster, toaster } from "@/components/ui/toaster";
+import { useEffect } from "react";
 
 interface GameGridProps {
   handleCellClick: (cell: string) => void;
   selectedCells: Record<string, string>;
+  isSelector: boolean;
+  isPredictor: boolean;
+  disabledCells: string[];
+  isPredictionEnabled: boolean;
+  gameId: number;
 }
 
 const GameGrid: React.FC<GameGridProps> = ({
   handleCellClick,
   selectedCells,
+  isSelector,
+  isPredictor,
+  disabledCells,
+  isPredictionEnabled,
+  gameId,
 }) => {
   const gridItems = Array.from({ length: 64 }, (_, index) => index);
-
+  useEffect(() => {
+    console.log("isSelector: ", isSelector);
+    console.log("isPredictor: ", isPredictor);
+    console.log("disabledCells: ", disabledCells);
+    console.log("isPredictionEnabled: ", isPredictionEnabled);
+  }, [isSelector, isPredictor, disabledCells, isPredictionEnabled]);
   return (
     <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}>
+      <Toaster />
       {gridItems.map((item) => {
         const row = Math.floor(item / 8);
         const col = item % 8;
         const cell = `${row}-${col}`;
-        const isSelected = !!selectedCells[cell]; // Check if selected
-        const playerColor = isSelected ? "green.500" : "gray.200"; // Choose color based on selected state
+        const cellOwner = selectedCells[cell];
+        console.log("cellOwner", cellOwner);
+        // const isSelected = cell === selectedCell;
+        // const isPredicted = selectedCells[cell];
+        // const playerColor = isSelected ? "green.500" : "gray.200"; // Choose color based on selected state
 
         return (
           <Box
             key={item}
-            bg={playerColor} // Apply the dynamic color
+            bg={
+              cellOwner
+                ? isPredictionEnabled
+                  ? "blue.200" // During prediction phase
+                  : "green.500" // During selection phase
+                : "gray.100" // Unselected cell
+            }
             height="50px"
             width="50px"
             display="flex"
             alignItems="center"
             justifyContent="center"
             borderRadius="md"
-            cursor="pointer"
+            cursor={
+              disabledCells.includes(cell) ||
+              (!isSelector && !isPredictionEnabled) ||
+              (isPredictor && !isPredictionEnabled)
+                ? "not-allowed"
+                : "pointer"
+            }
             _hover={{ bg: "gray.300" }}
-            onClick={() => handleCellClick(cell)}
+            onClick={() => {
+              if (
+                disabledCells.includes(cell) ||
+                (!isSelector && !isPredictionEnabled) ||
+                (isPredictor && !isPredictionEnabled)
+              ) {
+                toaster.create({
+                  type: "warning",
+                  title: "not ur move mate!",
+                  duration: 2000,
+                });
+              } else {
+                handleCellClick(cell);
+              }
+            }}
           >
-            {isSelected && selectedCells[cell].slice(0, 1).toUpperCase()}{" "}
+            {cellOwner && cellOwner.slice(0, 1).toUpperCase()}
             {/* Conditionally render the player name/initial*/}
           </Box>
         );
@@ -3992,279 +4132,6 @@ export default function LoginPage() {
 
 
 // File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\auth\signup\page.tsx
-"use client"; // This is crucial for client-side components
-
-import {
-  Heading,
-  Box,
-  Button,
-  Container,
-  Input,
-  Stack,
-  Fieldset,
-} from "@chakra-ui/react";
-import { Toaster, toaster } from "../../../components/ui/toaster";
-import { Field } from "@/components/ui/field";
-import { useState ,useEffect,useMemo} from "react";
-import { useRouter } from "next/navigation"; // Import from next/navigation
-import { FaUser,FaLock, FaBold } from 'react-icons/fa';
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
-
-export default function SignUpPage() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [init, setInit] = useState(false);
-  const [error, setError] = useState<string | null>(null); // For more specific error display
-  const router = useRouter();
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null); // Clear previous errors
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, email, password }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json(); // Get error details
-        if (errorData.message) {
-          setError(errorData.message); // Set specific error message
-          toaster.create({
-            title: errorData.message, // Display the server message
-            type: "error",
-            duration: 3000,
-          });
-        } else {
-          setError("Signup failed."); // Generic message if no specific message is provided
-          toaster.create({
-            title: "Signup failed.",
-            type: "error",
-            duration: 3000,
-          });
-        }
-        return;
-      }
-
-      // Signup successful
-      toaster.create({
-        title: "Account created.",
-        description: "We've created your account for you.",
-        type: "success",
-        duration: 6000,
-      });
-      router.push("/auth/login"); // Redirect using next/navigation
-    } catch (error) {
-      // Handle unexpected errors
-      setError("An unexpected error occurred.");
-      toaster.create({
-        title: "An unexpected error occurred.",
-        type: "error",
-        duration: 3000,
-      });
-    }
-  };
-
-  useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => {
-      setInit(true);
-    });
-  }, []);
-
-  const particlesLoaded = (container) => {
-    console.log(container);
-  };
-
-  const particlesOptions = useMemo(
-    () => ({
-      background: {
-        color: {
-          value: "#000000",
-        },
-      },
-      fpsLimit: 60,
-      interactivity: {
-        events: {
-          onClick: {
-            enable: true,
-            mode: "push",
-          },
-          onHover: {
-            enable: true,
-            mode: "repulse",
-          },
-          resize: true,
-        },
-        modes: {
-          push: {
-            quantity: 2,
-          },
-          repulse: {
-            distance: 100,
-            duration: 0.2,
-          },
-        },
-      },
-      particles: {
-        color: {
-          value: "#ffffff",
-        },
-        links: {
-          color: "#ffffff",
-          distance: 100,
-          enable: true,
-          opacity: 0.6,
-          width: 0.5,
-        },
-        collisions: {
-          enable: true,
-        },
-        move: {
-          direction: "none",
-          enable: true,
-          outModes: {
-            default: "bounce",
-          },
-          random: false,
-          speed: 1,
-          straight: false,
-        },
-        number: {
-          density: {
-            enable: true,
-            area: 800,
-          },
-          value: 40,
-        },
-        opacity: {
-          value: 0.3,
-        },
-        shape: {
-          type: "circle",
-        },
-        size: {
-          value: { min: 1, max: 3 },
-        },
-      },
-      detectRetina: true,
-    }),
-    []
-  );
-
-  return (
-    <Box 
-      className="bg-zinc-800"
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      p={8}
-    >
-       {init && (
-          <Particles
-          
-            id="tsparticles"
-            particlesLoaded={particlesLoaded}
-            options={particlesOptions}
-          />
-        )}
-      <Container
-        className="bg-black border-solid border-gray-50"
-        maxW="md"
-        p={6}
-        border="1px solid"
-        borderColor="gray"
-        borderRadius="md"
-        boxShadow="lg"
-      >
-        <Toaster />
-        <Heading as="h1" fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
-          Sign Up
-        </Heading>
-
-        <Box as="form" onSubmit={handleSubmit} width="100%">
-          <Fieldset.Root size="lg">
-            <Stack rowGap={4}>
-              <Fieldset.HelperText textAlign="center">
-                
-                Please provide your details below.
-              </Fieldset.HelperText>
-            </Stack>
-
-            <Fieldset.Content>
-              <Field label="Username" required>
-                <Input
-                  name="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  bg="transparent"
-                  borderColor="gray"
-                  placeholder="Enter your username"
-                  color="white"
-                  padding="4"
-                />
-              </Field>
-
-              <Field label="Email address" required>
-                <Input
-                  name="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  bg="transparent"
-                  borderColor="gray"
-                  placeholder="Enter your email"
-                  color="white"
-                  padding="4"
-                />
-              </Field>
-
-              <Field label="Password" marginBottom={6} required>
-                <Input
-                  name="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  bg="transparent"
-                  borderColor="gray"
-                  placeholder="Enter your password"
-                  color="white"
-                  padding="4"
-                />
-              </Field>
-            </Fieldset.Content>
-
-            <Button
-            onClick={handleSubmit}
-              type="submit"
-              display="flex"
-              colorScheme="blue"
-              width="40%"
-              padding="6"
-              fontWeight="bold"
-              className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
-              alignSelf="center"
-            >
-              Sign Up
-            </Button>
-          </Fieldset.Root>
-        </Box>
-      </Container>
-    </Box>
-  );
-}
 
 
 

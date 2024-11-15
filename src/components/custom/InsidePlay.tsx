@@ -50,6 +50,9 @@ export default function InsidePlay() {
   const { socket } = useContext(SocketContext);
 
   console.log("play page socket", socket);
+  useEffect(() => {
+    console.log("disabledCells", disabledCells);
+  }, [disabledCells]);
 
   useEffect(() => {
     if (socket) {
@@ -77,12 +80,12 @@ export default function InsidePlay() {
           "isPredictor:",
           isPredictor
         );
+        setDisabledCells(data.disabledCells);
       });
-      socket.on("updateDisalbedCells", (data: any) => {
+      socket.on("updateDisabledCells", (data: any) => {
         console.log("updating disabled cells", data);
-        if (data.gameId === gameId) {
-          setDisabledCells(data.disabledCells);
-        }
+
+        setDisabledCells(data.disabledCells);
       });
       socket.on("enablePrediction", (data: any) => {
         const username = sessionStorage.getItem("username");
@@ -162,7 +165,7 @@ export default function InsidePlay() {
         socket.off("enablePrediction");
         socket.off("cellPredicted");
         socket.off("cellSelected");
-        socket.off("updateDisalbedCells");
+        socket.off("updateDisabledCells");
       };
     }
   }, [socket, toaster]);
