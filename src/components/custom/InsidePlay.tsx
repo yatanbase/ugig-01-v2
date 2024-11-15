@@ -91,10 +91,10 @@ export default function InsidePlay() {
         const username = sessionStorage.getItem("username");
         setIsPredictionEnabled(true);
         console.log("Prediction enabled for:", username);
-        setSelectedCells((prev) => ({
-          ...prev,
-          [data.cell]: data.selector,
-        }));
+        // setSelectedCells((prev) => ({
+        //   ...prev,
+        //   [data.cell]: data.selector,
+        // }));
       });
 
       const handleAnyEvent = (event: any, ...args: any) => {
@@ -145,13 +145,19 @@ export default function InsidePlay() {
       socket.on("cellSelected", (data: any) => {
         console.log(`client ${data.username} selected cell ${data.cell}`);
 
-        setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
+        if (data.username !== sessionStorage.getItem("username")) {
+          // Check if it's NOT my selection
+          // Don't update selectedCells if it's my own selection.
+          // My selection is handled in the Grid component directly using selectedCellByMe
+        } else {
+          // setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username })); // Only update for opponent's selection
+        }
       });
       socket.on("cellPredicted", (data: any) => {
-        setSelectedCells((prev) => ({
-          ...prev,
-          [data.cell]: data.username,
-        }));
+        // setSelectedCells((prev) => ({
+        //   ...prev,
+        //   [data.cell]: data.username,
+        // }));
         setIsPredictionEnabled(false);
       });
       return () => {

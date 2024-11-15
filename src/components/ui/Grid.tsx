@@ -2,11 +2,11 @@
 "use client";
 import { SimpleGrid, Box } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface GameGridProps {
   handleCellClick: (cell: string) => void;
-  selectedCells: Record<string, string>;
+  selectedCells: Record<string, string>; // Change to store all selected and predicted cells
   isSelector: boolean;
   isPredictor: boolean;
   disabledCells: string[];
@@ -24,12 +24,22 @@ const GameGrid: React.FC<GameGridProps> = ({
   gameId,
 }) => {
   const gridItems = Array.from({ length: 64 }, (_, index) => index);
+  const [selectedCellByMe, setSelectedCellByMe] = useState<string | null>(null); // To track MY selection
+
   useEffect(() => {
     console.log("isSelector: ", isSelector);
     console.log("isPredictor: ", isPredictor);
     console.log("disabledCells: ", disabledCells);
     console.log("isPredictionEnabled: ", isPredictionEnabled);
-  }, [isSelector, isPredictor, disabledCells, isPredictionEnabled]);
+    console.log("selectedCells", selectedCells);
+  }, [
+    isSelector,
+    isPredictor,
+    disabledCells,
+    isPredictionEnabled,
+    selectedCells,
+  ]);
+
   return (
     <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}>
       <Toaster />
@@ -37,22 +47,28 @@ const GameGrid: React.FC<GameGridProps> = ({
         const row = Math.floor(item / 8);
         const col = item % 8;
         const cell = `${row}-${col}`;
-        const cellOwner = selectedCells[cell];
-        console.log("cellOwner", cellOwner);
-        // const isSelected = cell === selectedCell;
-        // const isPredicted = selectedCells[cell];
-        // const playerColor = isSelected ? "green.500" : "gray.200"; // Choose color based on selected state
+
+        const isDisabled = disabledCells.includes(cell);
+        const isSelectedByMe = cell === selectedCellByMe;
+        const isPredictedByMe =
+          selectedCells[cell] === sessionStorage.getItem("username");
+
+        let bgColor = "gray.100"; // Default: Unselected
+
+        if (isDisabled) {
+          bgColor = "gray.500"; // Disabled: Dark gray
+        } else if (isSelectedByMe) {
+          bgColor = "green.500"; // Selected by me: Green
+        } else if (isPredictedByMe) {
+          bgColor = "blue.200"; // Predicted by me: blue
+        } else if (selectedCells[cell]) {
+          bgColor = "green.500"; // Selected by opponent: Green (Predictor shouldn't see different color)
+        }
 
         return (
           <Box
             key={item}
-            bg={
-              cellOwner
-                ? isPredictionEnabled
-                  ? "blue.200" // During prediction phase
-                  : "green.500" // During selection phase
-                : "gray.100" // Unselected cell
-            }
+            bg={bgColor}
             height="50px"
             width="50px"
             display="flex"
@@ -60,31 +76,42 @@ const GameGrid: React.FC<GameGridProps> = ({
             justifyContent="center"
             borderRadius="md"
             cursor={
-              disabledCells.includes(cell) ||
+              isDisabled ||
               (!isSelector && !isPredictionEnabled) ||
               (isPredictor && !isPredictionEnabled)
                 ? "not-allowed"
                 : "pointer"
             }
-            _hover={{ bg: "gray.300" }}
+            _hover={
+              !isDisabled &&
+              ((isSelector && !isPredictionEnabled) ||
+                (isPredictor && isPredictionEnabled))
+                ? { bg: "gray.300" }
+                : {}
+            }
             onClick={() => {
               if (
-                disabledCells.includes(cell) ||
+                isDisabled ||
                 (!isSelector && !isPredictionEnabled) ||
                 (isPredictor && !isPredictionEnabled)
               ) {
                 toaster.create({
                   type: "warning",
-                  title: "not ur move mate!",
+                  title: "Not your move!",
                   duration: 2000,
                 });
               } else {
                 handleCellClick(cell);
+                if (isSelector) {
+                  setSelectedCellByMe(cell); // Update my selected cell
+                }
               }
             }}
           >
-            {cellOwner && cellOwner.slice(0, 1).toUpperCase()}
-            {/* Conditionally render the player name/initial*/}
+            {/* Display initials only if selected or predicted BY ME or disabled  */}
+            {(isSelectedByMe || isPredictedByMe || isDisabled) &&
+              selectedCells[cell] &&
+              selectedCells[cell].slice(0, 1).toUpperCase()}
           </Box>
         );
       })}
