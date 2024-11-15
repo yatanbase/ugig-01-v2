@@ -25,6 +25,9 @@ const GameGrid: React.FC<GameGridProps> = ({
 }) => {
   const gridItems = Array.from({ length: 64 }, (_, index) => index);
   const [selectedCellByMe, setSelectedCellByMe] = useState<string | null>(null); // To track MY selection
+  const [predictedCellByMe, setPredictedCellByMe] = useState<string | null>(
+    null
+  ); // To track MY prediction
 
   useEffect(() => {
     console.log("isSelector: ", isSelector);
@@ -39,6 +42,11 @@ const GameGrid: React.FC<GameGridProps> = ({
     isPredictionEnabled,
     selectedCells,
   ]);
+  useEffect(() => {
+    if (isPredictionEnabled || isSelector) {
+      setPredictedCellByMe(null);
+    }
+  }, [isPredictionEnabled]);
 
   return (
     <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}>
@@ -50,8 +58,7 @@ const GameGrid: React.FC<GameGridProps> = ({
 
         const isDisabled = disabledCells.includes(cell);
         const isSelectedByMe = cell === selectedCellByMe;
-        const isPredictedByMe =
-          selectedCells[cell] === sessionStorage.getItem("username");
+        const isPredictedByMe = cell === predictedCellByMe;
 
         let bgColor = "gray.100"; // Default: Unselected
 
@@ -84,6 +91,8 @@ const GameGrid: React.FC<GameGridProps> = ({
             }
             _hover={
               !isDisabled &&
+              !isPredictedByMe &&
+              !isSelectedByMe &&
               ((isSelector && !isPredictionEnabled) ||
                 (isPredictor && isPredictionEnabled))
                 ? { bg: "gray.300" }
@@ -104,6 +113,8 @@ const GameGrid: React.FC<GameGridProps> = ({
                 handleCellClick(cell);
                 if (isSelector) {
                   setSelectedCellByMe(cell); // Update my selected cell
+                } else if (isPredictor) {
+                  setPredictedCellByMe(cell); // Update my predicted cell
                 }
               }
             }}
