@@ -64,6 +64,24 @@ export default function InsidePlay() {
       socket.on("updateUserList", (users: any) => {
         setOnlineUsers(users);
       });
+      socket.on("gameOver", (data: { winner: string; scores: any }) => {
+        console.log("Game Over!", data);
+        if (data.winner === sessionStorage.getItem("username")) {
+          toaster.create({
+            title: "You won!",
+            description: `Final scores: ${JSON.stringify(data.scores)}`,
+            type: "success",
+            duration: 5000,
+          });
+        } else {
+          toaster.create({
+            title: `${data.winner} won!`,
+            description: `Final scores: ${JSON.stringify(data.scores)}`,
+            type: "error", // or a different notification type
+            duration: 10000,
+          });
+        }
+      });
       socket.on("turn", (data: any) => {
         // Listen for 'turn' event
 
@@ -195,6 +213,7 @@ export default function InsidePlay() {
         socket.off("enablePrediction");
         socket.off("cellPredicted");
         socket.off("cellSelected");
+        socket.off("gameOver");
         socket.off("updateDisabledCells");
         socket.off("scoreUpdate");
       };
