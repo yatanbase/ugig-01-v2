@@ -6,10 +6,11 @@ import { Box, VStack, Text, Heading, HStack, Button } from "@chakra-ui/react";
 import { SocketContext } from "../ui/SocketProvider";
 interface OnlineUserProps {
   onlineUsers: string[];
+  inGame: boolean;
   // handleInvite: (username: string) => void; // Add handleInvite prop
 }
 
-const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
+const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers, inGame }) => {
   const { socket } = useContext(SocketContext);
   console.log("onlineuserslist socket", socket);
   // const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
@@ -79,29 +80,40 @@ const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
           Online Users
         </Heading>
         <VStack rowGap={2} align="start">
-          {onlineUsers.length > 0 ? (
+          {!inGame && onlineUsers.length > 0
+            ? onlineUsers.map((user) => (
+                <HStack key={user} justify="space-between" width="100%">
+                  {/* Display the username */}
+                  <Text>{user}</Text>
+
+                  {/* Invite button */}
+                  <Button
+                    disabled={user === sessionStorage.getItem("username")}
+                    className={`px-3 py-1 ${
+                      user === sessionStorage.getItem("username")
+                        ? "bg-gray-400 text-white"
+                        : "bg-white text-black"
+                    }`}
+                    onClick={() => handleInvite(user)}
+                  >
+                    Invite
+                  </Button>
+                </HStack>
+              ))
+            : !inGame && <Text>No users online</Text>}
+          {inGame &&
             onlineUsers.map((user) => (
               <HStack key={user} justify="space-between" width="100%">
                 {/* Display the username */}
                 <Text>{user}</Text>
 
-                {/* Invite button */}
-                <Button
-                  disabled={user === sessionStorage.getItem("username")}
-                  className={`px-3 py-1 ${
-                    user === sessionStorage.getItem("username")
-                      ? "bg-gray-400 text-white"
-                      : "bg-white text-black"
-                  }`}
-                  onClick={() => handleInvite(user)}
-                >
-                  Invite
-                </Button>
+                {/* Green Circle */}
+                <Box
+                  className="w-3 h-3 rounded-full bg-green-500"
+                  title="In Game"
+                ></Box>
               </HStack>
-            ))
-          ) : (
-            <Text>No users online</Text>
-          )}
+            ))}
         </VStack>
       </VStack>
     </Box>

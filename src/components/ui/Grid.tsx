@@ -76,8 +76,8 @@ const GameGrid: React.FC<GameGridProps> = ({
           <Box
             key={item}
             bg={bgColor}
-            height="50px"
-            width="50px"
+            width={{ base: "20px", md: "30px", lg: "50px" }}
+            height={{ base: "20px", md: "30px", lg: "50px" }}
             display="flex"
             alignItems="center"
             justifyContent="center"

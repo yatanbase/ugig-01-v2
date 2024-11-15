@@ -27,6 +27,7 @@ export default function InsidePlay() {
   const [isPredictor, setIsPredictor] = useState(false);
   const [isPredictionEnabled, setIsPredictionEnabled] = useState(false);
   const [disabledCells, setDisabledCells] = useState<string[]>([]);
+  const [scores, setScores] = useState<Record<string, number>>({}); // State for scores
 
   const [currentTurn, setCurrentTurn] = useState<{
     selector: string | null;
@@ -74,11 +75,14 @@ export default function InsidePlay() {
         setIsSelector(data.selector === username);
         setIsPredictor(data.predictor === username);
         setIsPredictionEnabled(false);
+        setScores(data.scores);
         console.log(
           "[InsidePlay] isSelector:",
           isSelector,
           "isPredictor:",
-          isPredictor
+          isPredictor,
+          "scores:",
+          scores
         );
         setDisabledCells(data.disabledCells);
       });
@@ -86,6 +90,26 @@ export default function InsidePlay() {
         console.log("updating disabled cells", data);
 
         setDisabledCells(data.disabledCells);
+      });
+      socket.on("scoreUpdate", (updatedScores: Record<string, number>) => {
+        setScores(updatedScores);
+      });
+
+      socket.on("predictionResult", (data: any) => {
+        console.log("predictionResult received:", data); // Add this line
+
+        toaster.create({
+          title: `${data.username}'s prediction is ${
+            data.isCorrect ? "correct" : "incorrect"
+          }`,
+          type: data.isCorrect ? "success" : "error",
+          duration: 3000,
+        });
+
+        //  setSelectedCells((prev) => ({
+        //    ...prev,
+        //    [data.cell]: data.username,
+        //  })); // update the selected cell here
       });
       socket.on("enablePrediction", (data: any) => {
         const username = sessionStorage.getItem("username");
@@ -172,6 +196,7 @@ export default function InsidePlay() {
         socket.off("cellPredicted");
         socket.off("cellSelected");
         socket.off("updateDisabledCells");
+        socket.off("scoreUpdate");
       };
     }
   }, [socket, toaster]);
@@ -219,6 +244,7 @@ export default function InsidePlay() {
             <>
               <OnlineUsersList
                 onlineUsers={onlineUsers}
+                inGame={false}
                 // handleInvite={handleInvite}
               />
               {receivedInvite && (
@@ -250,22 +276,55 @@ export default function InsidePlay() {
               />
               {/* Example: Conditionally render a button only for the selector */}
               {isSelector && (
-                <Button className={`px-3 py-1 ${"bg-white text-black"}`}>
+                <Text className={`px-3 py-1 ${" text-white"}`}>
+                  {" "}
+                  You are the<span className="text-green-600">
+                    {" "}
+                    Selector
+                  </span>{" "}
+                </Text>
+              )}
+              {isSelector && (
+                <Button className={`px-3 py-1 ${"text-white"}`}>
                   Select a cell
                 </Button>
               )}
               {/* Example: Display a message for the predictor */}
-              {isPredictor && !isPredictionEnabled && (
-                <p className={`px-3 py-1 ${"bg-white text-black"}`}>
+              {isPredictor && (
+                <Text className={`px-3 py-1 ${" text-white"}`}>
+                  {" "}
+                  You are the<span className="text-blue-600">
+                    {" "}
+                    Predictor
+                  </span>{" "}
+                </Text>
+              )}
+              {isPredictor && !isPredictionEnabled ? (
+                <p className={`px-3 py-1 ${"text-white"}`}>
                   Waiting for selector...
                 </p>
+              ) : (
+                <p> You can Predict now</p>
               )}
-              <Text>
+              {/* Display scores */}
+              <VStack rowGap={2} alignItems="center">
+                {" "}
+                {/* Center scores */}
+                {Object.entries(scores).map(([username, score]) => (
+                  <Text
+                    key={username}
+                    className={`px-3 py-1 ${"bg-white text-black"}`}
+                  >
+                    {username}: {score}
+                  </Text>
+                ))}
+              </VStack>
+              {/* <Text>
                 temporarily diplaying participants with the same copmponent
-              </Text>
+              </Text> */}
               <OnlineUsersList
                 onlineUsers={onlineUsers}
-
+                inGame={true}
                 // handleInvite={handleInvite}
               />{" "}
               {/* Pass handleInvite */}
