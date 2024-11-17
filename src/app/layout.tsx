@@ -3,8 +3,13 @@ import { Inter, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import { Provider } from "../components/ui/provider";
 import { SocketProvider } from "@/components/ui/SocketProvider";
+import { Orbitron } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  variable: "--font-orbitron",
+});
 const pixelify = Pixelify_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} `}>
+      <body className={`${orbitron.className} `}>
         {" "}
         {/* <SocketProvider> */} {/* Place SocketProvider here */}
         <Provider>

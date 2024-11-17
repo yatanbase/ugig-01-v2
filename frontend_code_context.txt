@@ -11,25 +11,40 @@ import {
   VStack,
 } from "@chakra-ui/react";
 // import { io } from "socket.io-client";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import GameGrid from "../../components/ui/Grid";
 import OnlineUsersList from "../../components/ui/OnlineUsersList";
+import Confetti from "react-confetti";
 import { Socket } from "socket.io-client";
 import {
   SocketContext,
   SocketProvider,
 } from "../../components/ui/SocketProvider";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
 import { useRouter } from "next/navigation";
 
 import { Toaster, toaster } from "@/components/ui/toaster";
+import Image from "next/image";
 
 export default function InsidePlay() {
   const router = useRouter();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showLosingGraphic, setShowLosingGraphic] = useState(false);
+  const confettiRef = useRef<any>(null); // Ref for confetti canvas
   const [gameId, setGameId] = useState<number | null>(null);
   const [isSelector, setIsSelector] = useState(false);
   const [isPredictor, setIsPredictor] = useState(false);
   const [isPredictionEnabled, setIsPredictionEnabled] = useState(false);
   const [disabledCells, setDisabledCells] = useState<string[]>([]);
+  const [scores, setScores] = useState<Record<string, number>>({}); // State for scores
+  const [prevScores, setPrevScores] = useState<Record<string, number>>({});
+  const [animateScores, setAnimateScores] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  //check for token through useEffect in session storage and redirect to login if not found
 
   const [currentTurn, setCurrentTurn] = useState<{
     selector: string | null;
@@ -42,6 +57,8 @@ export default function InsidePlay() {
   const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
     {}
   );
+  const [init, setInit] = useState(false);
+
   const [inviteSent, setInviteSent] = useState(false); // Track invite status
   const [receivedInvite, setReceivedInvite] = useState<
     | {
@@ -49,13 +66,149 @@ export default function InsidePlay() {
       }
     | undefined
   >(undefined);
+  useEffect(() => {
+    if (!sessionStorage.getItem("token")) {
+      router.push("/auth/login");
+    }
+  }, [router]);
 
   const { socket } = useContext(SocketContext);
-
+  useEffect(() => {
+    // useEffect for Confetti and Graphic Cleanup
+    return () => {
+      setShowConfetti(false); // Hide confetti on component unmount
+      setShowLosingGraphic(false); // Hide losing graphic on component unmount
+    };
+  }, []);
   console.log("play page socket", socket);
   useEffect(() => {
     console.log("disabledCells", disabledCells);
   }, [disabledCells]);
+  useEffect(() => {
+    // Initialize the particle engine
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+  const particlesOptions = useMemo(
+    () => ({
+      fullScreen: {
+        enable: true,
+        zIndex: -1,
+      },
+      background: {
+        color: {
+          value: "#000000", // Very dark background
+        },
+      },
+      fpsLimit: 60,
+      particles: {
+        number: {
+          value: 100,
+          density: {
+            enable: true,
+            value_area: 1000,
+          },
+        },
+        color: {
+          value: ["#ffffff", "#87ceeb"], // White and light blue for stars
+        },
+        shape: {
+          type: "circle",
+        },
+        opacity: {
+          value: 0.8,
+          random: true,
+          animation: {
+            enable: true,
+            speed: 0.1,
+            minimumValue: 0.1,
+            sync: false,
+          },
+        },
+        size: {
+          value: 2,
+          random: true,
+          animation: {
+            enable: true,
+            speed: 1,
+            minimumValue: 0.1,
+            sync: false,
+          },
+        },
+        move: {
+          enable: true,
+          speed: 0.3, // Slower movement
+          direction: "none",
+          random: true,
+          straight: false,
+          outModes: {
+            default: "out",
+          },
+        },
+        twinkle: {
+          particles: {
+            enable: true,
+            frequency: 0.05,
+            opacity: 1,
+          },
+        },
+      },
+      particles2: {
+        // Meteor shower effect
+        number: {
+          value: 2,
+          density: {
+            enable: true,
+            value_area: 800,
+          },
+        },
+        color: {
+          value: "#ffffff",
+        },
+        shape: {
+          type: "line",
+        },
+        size: {
+          value: { min: 0.1, max: 1 },
+        },
+        move: {
+          enable: true,
+          speed: 15,
+          direction: "bottom-right",
+          straight: true,
+          outModes: "out",
+        },
+        life: {
+          duration: {
+            sync: true,
+            value: 1,
+          },
+          count: 1,
+        },
+      },
+      interactivity: {
+        events: {
+          onHover: {
+            enable: true,
+            mode: "bubble",
+          },
+        },
+        modes: {
+          bubble: {
+            distance: 100,
+            size: 3,
+            duration: 2,
+            opacity: 0.8,
+          },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
 
   useEffect(() => {
     if (socket) {
@@ -65,6 +218,28 @@ export default function InsidePlay() {
       });
       socket.on("updateUserList", (users: any) => {
         setOnlineUsers(users);
+      });
+      socket.on("gameOver", (data: { winner: string; scores: any }) => {
+        console.log("Game Over!", data);
+        const username = sessionStorage.getItem("username");
+        console.log("username", username);
+        if (data.winner === sessionStorage.getItem("username")) {
+          setShowConfetti(true);
+          toaster.create({
+            title: `${username?.toUpperCase()}  won!`,
+            description: `Final scores: ${JSON.stringify(data.scores)}`,
+            type: "success",
+            duration: 5000,
+          });
+        } else {
+          setShowLosingGraphic(true);
+          toaster.create({
+            title: `${data.winner} won!`,
+            description: `Final scores: ${JSON.stringify(data.scores)}`,
+            type: "error", // or a different notification type
+            duration: 10000,
+          });
+        }
       });
       socket.on("turn", (data: any) => {
         // Listen for 'turn' event
@@ -77,11 +252,14 @@ export default function InsidePlay() {
         setIsSelector(data.selector === username);
         setIsPredictor(data.predictor === username);
         setIsPredictionEnabled(false);
+        setScores(data.scores);
         console.log(
           "[InsidePlay] isSelector:",
           isSelector,
           "isPredictor:",
-          isPredictor
+          isPredictor,
+          "scores:",
+          scores
         );
         setDisabledCells(data.disabledCells);
       });
@@ -90,14 +268,34 @@ export default function InsidePlay() {
 
         setDisabledCells(data.disabledCells);
       });
+      socket.on("scoreUpdate", (updatedScores: Record<string, number>) => {
+        setScores(updatedScores);
+      });
+
+      socket.on("predictionResult", (data: any) => {
+        console.log("predictionResult received:", data); // Add this line
+
+        // toaster.create({
+        //   title: `${data.username}'s prediction is ${
+        //     data.isCorrect ? "correct" : "incorrect"
+        //   }`,
+        //   type: data.isCorrect ? "success" : "error",
+        //   duration: 1000,
+        // });
+
+        //  setSelectedCells((prev) => ({
+        //    ...prev,
+        //    [data.cell]: data.username,
+        //  })); // update the selected cell here
+      });
       socket.on("enablePrediction", (data: any) => {
         const username = sessionStorage.getItem("username");
         setIsPredictionEnabled(true);
         console.log("Prediction enabled for:", username);
-        setSelectedCells((prev) => ({
-          ...prev,
-          [data.cell]: data.selector,
-        }));
+        // setSelectedCells((prev) => ({
+        //   ...prev,
+        //   [data.cell]: data.selector,
+        // }));
       });
 
       const handleAnyEvent = (event: any, ...args: any) => {
@@ -148,13 +346,19 @@ export default function InsidePlay() {
       socket.on("cellSelected", (data: any) => {
         console.log(`client ${data.username} selected cell ${data.cell}`);
 
-        setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username }));
+        if (data.username !== sessionStorage.getItem("username")) {
+          // Check if it's NOT my selection
+          // Don't update selectedCells if it's my own selection.
+          // My selection is handled in the Grid component directly using selectedCellByMe
+        } else {
+          // setSelectedCells((prev) => ({ ...prev, [data.cell]: data.username })); // Only update for opponent's selection
+        }
       });
       socket.on("cellPredicted", (data: any) => {
-        setSelectedCells((prev) => ({
-          ...prev,
-          [data.cell]: data.username,
-        }));
+        // setSelectedCells((prev) => ({
+        //   ...prev,
+        //   [data.cell]: data.username,
+        // }));
         setIsPredictionEnabled(false);
       });
       return () => {
@@ -168,7 +372,9 @@ export default function InsidePlay() {
         socket.off("enablePrediction");
         socket.off("cellPredicted");
         socket.off("cellSelected");
+        socket.off("gameOver");
         socket.off("updateDisabledCells");
+        socket.off("scoreUpdate");
       };
     }
   }, [socket, toaster]);
@@ -181,6 +387,22 @@ export default function InsidePlay() {
   //     setInviteSent(true);
   //   }
   // };
+  useEffect(() => {
+    const newAnimateScores: Record<string, boolean> = {};
+    Object.keys(scores).forEach((username) => {
+      if (scores[username] !== prevScores[username]) {
+        newAnimateScores[username] = true;
+      }
+    });
+    setAnimateScores(newAnimateScores);
+    setPrevScores(scores);
+
+    const timer = setTimeout(() => {
+      setAnimateScores({});
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [scores, prevScores]);
   const handleAcceptInvite = () => {
     if (socket && receivedInvite) {
       console.log("Accepting invite from:", receivedInvite.from);
@@ -205,74 +427,238 @@ export default function InsidePlay() {
     }
   };
 
+  const containerStyle: React.CSSProperties = {
+    background: "linear-gradient(135deg, #0b1120 0%, #161e2e 100%)", // Even darker gray-blue
+    minHeight: "100vh",
+    color: "#e2e8f0", // Soft off-white for text
+    fontFamily: "var(--font-orbitron), sans-serif",
+    padding: "2rem",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    position: "relative",
+    overflow: "hidden",
+    zIndex: 1,
+  };
+
+  const headingStyle: React.CSSProperties = {
+    fontSize: "2rem",
+    textAlign: "center",
+    marginBottom: "2rem",
+    textTransform: "uppercase",
+    letterSpacing: "3px",
+    textShadow: "0 0 10px rgba(226, 232, 240, 0.8)", // Soft glow effect
+    color: "#a3bffa", // Muted pastel blue
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    background: "#38bdf8", // Soft teal
+    color: "#f8fafc", // Near-white text
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontFamily: "var(--font-orbitron), sans-serif",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    fontSize: "14px",
+    letterSpacing: "1px",
+    boxShadow: "0 4px 8px rgba(56, 189, 248, 0.4)", // Subtle glow
+    transition: "all 0.3s ease",
+  };
+
+  const textStyle: React.CSSProperties = {
+    fontSize: "1rem",
+    textAlign: "center",
+    marginBottom: "1rem",
+    color: "#94a3b8", // Muted gray for secondary text
+  };
+
+  const scoreStyle: React.CSSProperties = {
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "500px",
+    padding: "10px",
+    borderRadius: "5px",
+    background: "rgba(255, 255, 255, 0.05)", // Transparent white for subtle contrast
+    color: "#e2e8f0", // Off-white for text
+    marginBottom: "10px",
+  };
+
+  const username = sessionStorage.getItem("username") || "";
+  const opponent = Object.keys(scores).find((name) => name !== username) || "";
   return (
-    <Box>
-      <Container maxW="container.xl" centerContent>
-        <Toaster />
-        <VStack rowGap={8} align="center">
-          {/* Show user list if not in a room */}
+    <div style={containerStyle} ref={confettiRef}>
+      {init && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: -1,
+          }}
+        >
+          <Particles id="tsparticles" options={particlesOptions} />
+        </div>
+      )}
+      {showConfetti && (
+        <Confetti
+          width={confettiRef.current?.offsetWidth}
+          height={confettiRef.current?.offsetHeight}
+          recycle={true}
+          numberOfPieces={100}
+        />
+      )}
 
-          {!roomId && (
-            <>
-              <OnlineUsersList
-                onlineUsers={onlineUsers}
-                // handleInvite={handleInvite}
-              />
-              {receivedInvite && (
-                <Button
-                  className={`px-3 py-1 ${"bg-white text-black"}`}
-                  onClick={handleAcceptInvite}
+      {showLosingGraphic && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0, 0, 0, 0.8)",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+          }}
+        >
+          <Image
+            src="/losing.gif"
+            alt="Better luck next time!"
+            width={200}
+            height={200}
+            objectFit="contain"
+          />
+          <p
+            style={{
+              color: "#ffa500",
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              marginTop: "1rem",
+              animation: "pulse 2s infinite",
+            }}
+          >
+            Better luck next time!
+          </p>
+        </div>
+      )}
+
+      {!roomId && (
+        <>
+          <OnlineUsersList onlineUsers={onlineUsers} inGame={false} />
+          {receivedInvite && (
+            <button style={buttonStyle} onClick={handleAcceptInvite}>
+              Accept Invite from {receivedInvite.from}
+            </button>
+          )}
+        </>
+      )}
+
+      {roomId && gameId && (
+        <>
+          <h2 style={headingStyle}>
+            Room: {roomId} | Game: {gameId}
+          </h2>
+
+          {/* Opponent's score */}
+          <div style={scoreStyle}>
+            <span>{opponent}</span>
+            <AnimatePresence>
+              {animateScores[opponent] && (
+                <motion.span
+                  key={`${opponent}-score`}
+                  initial={{ scale: 1.5, color: "#4caf50" }}
+                  animate={{ scale: 1, color: "#e94560" }}
+                  exit={{ scale: 1 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  Accept Invite from {receivedInvite.from}
-                </Button>
+                  {scores[opponent]}
+                </motion.span>
               )}
-            </>
-          )}
+            </AnimatePresence>
+            {!animateScores[opponent] && <span>{scores[opponent]}</span>}
+          </div>
 
-          {/* Conditionally render the rest based on roomId */}
+          <GameGrid
+            handleCellClick={handleCellClick}
+            selectedCells={selectedCells}
+            isSelector={isSelector}
+            isPredictor={isPredictor}
+            disabledCells={disabledCells}
+            isPredictionEnabled={isPredictionEnabled}
+            gameId={gameId}
+          />
 
-          {roomId && gameId ? ( // Only show room details and game if in a room
+          {/* Player's score */}
+          <div style={scoreStyle}>
+            <span>{username}</span>
+            <AnimatePresence>
+              {animateScores[username] && (
+                <motion.span
+                  key={`${username}-score`}
+                  initial={{ scale: 1.5, color: "#4caf50" }}
+                  animate={{ scale: 1, color: "#e94560" }}
+                  exit={{ scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {scores[username]}
+                </motion.span>
+              )}
+            </AnimatePresence>
+            {!animateScores[username] && <span>{scores[username]}</span>}
+          </div>
+
+          {isSelector && (
             <>
-              <Heading size="md">
-                In Room: {roomId}, Game ID: {gameId}
-              </Heading>
-              <GameGrid
-                handleCellClick={handleCellClick}
-                selectedCells={selectedCells}
-                isSelector={isSelector}
-                isPredictor={isPredictor}
-                disabledCells={disabledCells}
-                isPredictionEnabled={isPredictionEnabled}
-                gameId={gameId}
-              />
-              {/* Example: Conditionally render a button only for the selector */}
-              {isSelector && (
-                <Button className={`px-3 py-1 ${"bg-white text-black"}`}>
-                  Select a cell
-                </Button>
-              )}
-              {/* Example: Display a message for the predictor */}
-              {isPredictor && !isPredictionEnabled && (
-                <p className={`px-3 py-1 ${"bg-white text-black"}`}>
-                  Waiting for selector...
-                </p>
-              )}
-              <Text>
-                temporarily diplaying participants with the same copmponent
-              </Text>
-              <OnlineUsersList
-                onlineUsers={onlineUsers}
-
-                // handleInvite={handleInvite}
-              />{" "}
-              {/* Pass handleInvite */}
+              <p style={{ ...textStyle, color: "#4caf50" }}>
+                You are the Selector
+              </p>
+              <button style={buttonStyle}>Select a cell</button>
             </>
-          ) : (
-            <Text>Waiting to Create or Join a room...</Text>
           )}
-        </VStack>
-      </Container>
-    </Box>
+          {isPredictor && (
+            <>
+              <p style={{ ...textStyle, color: "#2196f3" }}>
+                You are the Predictor
+              </p>
+              {!isPredictionEnabled ? (
+                <p style={textStyle}>Waiting for selector...</p>
+              ) : (
+                <p style={textStyle}>You can Predict now</p>
+              )}
+            </>
+          )}
+          <OnlineUsersList onlineUsers={onlineUsers} inGame={true} />
+        </>
+      )}
+
+      {!roomId && !gameId && (
+        <p style={textStyle}>Waiting to Create or Join a room...</p>
+      )}
+
+      <style jsx global>{`
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -1327,11 +1713,11 @@ export const FileUploadTrigger = ChakraFileUpload.Trigger
 "use client";
 import { SimpleGrid, Box } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface GameGridProps {
   handleCellClick: (cell: string) => void;
-  selectedCells: Record<string, string>;
+  selectedCells: Record<string, string>; // Change to store all selected and predicted cells
   isSelector: boolean;
   isPredictor: boolean;
   disabledCells: string[];
@@ -1349,12 +1735,30 @@ const GameGrid: React.FC<GameGridProps> = ({
   gameId,
 }) => {
   const gridItems = Array.from({ length: 64 }, (_, index) => index);
+  const [selectedCellByMe, setSelectedCellByMe] = useState<string | null>(null); // To track MY selection
+  const [predictedCellByMe, setPredictedCellByMe] = useState<string | null>(
+    null
+  ); // To track MY prediction
+
   useEffect(() => {
     console.log("isSelector: ", isSelector);
     console.log("isPredictor: ", isPredictor);
     console.log("disabledCells: ", disabledCells);
     console.log("isPredictionEnabled: ", isPredictionEnabled);
-  }, [isSelector, isPredictor, disabledCells, isPredictionEnabled]);
+    console.log("selectedCells", selectedCells);
+  }, [
+    isSelector,
+    isPredictor,
+    disabledCells,
+    isPredictionEnabled,
+    selectedCells,
+  ]);
+  useEffect(() => {
+    if (isPredictionEnabled || isSelector) {
+      setPredictedCellByMe(null);
+    }
+  }, [isPredictionEnabled]);
+
   return (
     <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}>
       <Toaster />
@@ -1362,54 +1766,74 @@ const GameGrid: React.FC<GameGridProps> = ({
         const row = Math.floor(item / 8);
         const col = item % 8;
         const cell = `${row}-${col}`;
-        const cellOwner = selectedCells[cell];
-        console.log("cellOwner", cellOwner);
-        // const isSelected = cell === selectedCell;
-        // const isPredicted = selectedCells[cell];
-        // const playerColor = isSelected ? "green.500" : "gray.200"; // Choose color based on selected state
+
+        const isDisabled = disabledCells.includes(cell);
+        const isSelectedByMe = cell === selectedCellByMe;
+        const isPredictedByMe = cell === predictedCellByMe;
+
+        let bgColor = "gray.100"; // Default: Unselected
+
+        if (isDisabled) {
+          bgColor = "gray.500"; // Disabled: Dark gray
+        } else if (isSelectedByMe) {
+          bgColor = "green.500"; // Selected by me: Green
+        } else if (isPredictedByMe) {
+          bgColor = "blue.200"; // Predicted by me: blue
+        } else if (selectedCells[cell]) {
+          bgColor = "green.500"; // Selected by opponent: Green (Predictor shouldn't see different color)
+        }
 
         return (
           <Box
             key={item}
-            bg={
-              cellOwner
-                ? isPredictionEnabled
-                  ? "blue.200" // During prediction phase
-                  : "green.500" // During selection phase
-                : "gray.100" // Unselected cell
-            }
-            height="50px"
-            width="50px"
+            bg={bgColor}
+            width={{ base: "30px", md: "50px", lg: "50px" }}
+            height={{ base: "30px", md: "50px", lg: "50px" }}
             display="flex"
             alignItems="center"
             justifyContent="center"
             borderRadius="md"
             cursor={
-              disabledCells.includes(cell) ||
+              isDisabled ||
               (!isSelector && !isPredictionEnabled) ||
               (isPredictor && !isPredictionEnabled)
                 ? "not-allowed"
                 : "pointer"
             }
-            _hover={{ bg: "gray.300" }}
+            _hover={
+              !isDisabled &&
+              !isPredictedByMe &&
+              !isSelectedByMe &&
+              ((isSelector && !isPredictionEnabled) ||
+                (isPredictor && isPredictionEnabled))
+                ? { bg: "gray.300" }
+                : {}
+            }
             onClick={() => {
               if (
-                disabledCells.includes(cell) ||
+                isDisabled ||
                 (!isSelector && !isPredictionEnabled) ||
                 (isPredictor && !isPredictionEnabled)
               ) {
                 toaster.create({
                   type: "warning",
-                  title: "not ur move mate!",
+                  title: "Not your move!",
                   duration: 2000,
                 });
               } else {
                 handleCellClick(cell);
+                if (isSelector) {
+                  setSelectedCellByMe(cell); // Update my selected cell
+                } else if (isPredictor) {
+                  setPredictedCellByMe(cell); // Update my predicted cell
+                }
               }
             }}
           >
-            {cellOwner && cellOwner.slice(0, 1).toUpperCase()}
-            {/* Conditionally render the player name/initial*/}
+            {/* Display initials only if selected or predicted BY ME or disabled  */}
+            {(isSelectedByMe || isPredictedByMe || isDisabled) &&
+              selectedCells[cell] &&
+              selectedCells[cell].slice(0, 1).toUpperCase()}
           </Box>
         );
       })}
@@ -1796,29 +2220,22 @@ export default OnlineUsers;
 
 
 // File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\components\ui\OnlineUsersList.tsx
-// src/components/OnlineUserList.tsx
 "use client";
-import { useEffect, useState, useContext } from "react";
 
-import { Box, VStack, Text, Heading, HStack, Button } from "@chakra-ui/react";
+import { useEffect, useState, useContext } from "react";
 import { SocketContext } from "../ui/SocketProvider";
+
 interface OnlineUserProps {
   onlineUsers: string[];
-  // handleInvite: (username: string) => void; // Add handleInvite prop
+  inGame: boolean;
 }
 
-const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
+export default function Component({ onlineUsers, inGame }: OnlineUserProps) {
   const { socket } = useContext(SocketContext);
-  console.log("onlineuserslist socket", socket);
-  // const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-  const [inviteStatus, setInviteStatus] = useState<string | null>(null); // State for invite status
+  const [inviteStatus, setInviteStatus] = useState<string | null>(null);
 
   const handleInvite = (username: string) => {
-    console.log("handle invite");
     if (socket) {
-      // Emit the "sendInvite" event over the socket with the username
-      console.log("socket before sending invite", username);
-
       socket.emit("sendInvite", { to: username });
       console.log(`Invite sent successfully from client side to ${username}`);
     }
@@ -1826,14 +2243,6 @@ const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
 
   useEffect(() => {
     if (socket) {
-      // socket.on("connect", () => {
-      //   socket.emit("getOnlineUsers"); // Get initial user list
-      // });
-
-      // socket.on("updateUserList", (users: any) => {
-      //   setOnlineUsers(users);
-      // });
-
       socket.on(
         "inviteResponse",
         (response: { success: boolean; message: string }) => {
@@ -1844,16 +2253,11 @@ const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
           }
         }
       );
+
       socket.on("receiveInvite", (data) => {
-        console.log("pohoch gaye but andar");
         console.log("Received invite from:", data.from);
-        // setReceivedInvite(data); // Set receivedInvite state
-        // toaster.create({
-        //   title: `Received invite from ${data.from}`,
-        //   type: "info",
-        //   duration: 10000,
-        // });
       });
+
       const handleAnyEvent = (event: any, ...args: any) => {
         console.log(`Received event: ${event}`, args);
       };
@@ -1863,7 +2267,6 @@ const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
       return () => {
         socket.off("connect");
         socket.offAny(handleAnyEvent);
-
         socket.off("updateUserList");
         socket.off("inviteResponse");
       };
@@ -1871,42 +2274,154 @@ const OnlineUserList: React.FC<OnlineUserProps> = ({ onlineUsers }) => {
   }, [socket]);
 
   return (
-    <Box>
-      <VStack rowGap={4} align="center">
-        <Heading as="h2" size="lg">
-          Online Users
-        </Heading>
-        <VStack rowGap={2} align="start">
-          {onlineUsers.length > 0 ? (
-            onlineUsers.map((user) => (
-              <HStack key={user} justify="space-between" width="100%">
-                {/* Display the username */}
-                <Text>{user}</Text>
-
-                {/* Invite button */}
-                <Button
-                  disabled={user === sessionStorage.getItem("username")}
-                  className={`px-3 py-1 ${
+    <div
+      style={{
+        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        borderRadius: "15px",
+        padding: "20px",
+        color: "#94a3b8",
+        fontFamily: "'Orbitron', sans-serif",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        maxWidth: "400px",
+        margin: "0 auto",
+      }}
+    >
+      <h2
+        style={{
+          fontSize: "20px",
+          textAlign: "center",
+          marginBottom: "20px",
+          textTransform: "uppercase",
+          letterSpacing: "2px",
+          color: "#e2e8f0",
+        }}
+      >
+        Online Players
+      </h2>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+        }}
+      >
+        {!inGame && onlineUsers.length > 0 ? (
+          onlineUsers.map((user) => (
+            <div
+              key={user}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "rgba(255, 255, 255, 0.05)",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                transition: "all 0.3s ease",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  color: "#e2e8f0",
+                }}
+              >
+                {user}
+              </span>
+              <button
+                disabled={user === sessionStorage.getItem("username")}
+                onClick={() => handleInvite(user)}
+                style={{
+                  background:
                     user === sessionStorage.getItem("username")
-                      ? "bg-gray-400 text-white"
-                      : "bg-white text-black"
-                  }`}
-                  onClick={() => handleInvite(user)}
-                >
-                  Invite
-                </Button>
-              </HStack>
-            ))
-          ) : (
-            <Text>No users online</Text>
-          )}
-        </VStack>
-      </VStack>
-    </Box>
+                      ? "#4a5568"
+                      : "#3182ce",
+                  color: "#fff",
+                  border: "none",
+                  padding: "6px 12px",
+                  borderRadius: "4px",
+                  cursor:
+                    user === sessionStorage.getItem("username")
+                      ? "not-allowed"
+                      : "pointer",
+                  transition: "all 0.3s ease",
+                  fontFamily: "'Orbitron', sans-serif",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  fontSize: "12px",
+                  letterSpacing: "1px",
+                }}
+              >
+                Invite
+              </button>
+            </div>
+          ))
+        ) : !inGame ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "20px",
+              background: "rgba(255, 255, 255, 0.05)",
+              borderRadius: "8px",
+              color: "#e2e8f0",
+            }}
+          >
+            No players online
+          </div>
+        ) : null}
+        {inGame &&
+          onlineUsers.map((user) => (
+            <div
+              key={user}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "rgba(255, 255, 255, 0.05)",
+                padding: "10px 15px",
+                borderRadius: "8px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  color: "#e2e8f0",
+                }}
+              >
+                {user}
+              </span>
+              <div
+                title="In Game"
+                style={{
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "#48bb78",
+                  boxShadow: "0 0 5px #48bb78",
+                }}
+              ></div>
+            </div>
+          ))}
+      </div>
+      {inviteStatus && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            background: "rgba(255, 255, 255, 0.05)",
+            borderRadius: "8px",
+            textAlign: "center",
+            fontSize: "14px",
+            color: "#e2e8f0",
+          }}
+        >
+          {inviteStatus}
+        </div>
+      )}
+    </div>
   );
-};
-
-export default OnlineUserList;
+}
 
 
 
@@ -4014,7 +4529,7 @@ export default function LoginPage() {
         description: "You have successfully logged in.",
         type: "success",
       });
-      router.push("/");
+      router.push("/play");
     } catch (error) {
       setError("An unexpected error occurred.");
       toaster.create({
@@ -4132,6 +4647,279 @@ export default function LoginPage() {
 
 
 // File: \Wisflux\Internship Assignments\ugig v2 draft\ugig-01-v2\src\app\auth\signup\page.tsx
+"use client"; // This is crucial for client-side components
+
+import {
+  Heading,
+  Box,
+  Button,
+  Container,
+  Input,
+  Stack,
+  Fieldset,
+} from "@chakra-ui/react";
+import { Toaster, toaster } from "../../../components/ui/toaster";
+import { Field } from "@/components/ui/field";
+import { useState ,useEffect,useMemo} from "react";
+import { useRouter } from "next/navigation"; // Import from next/navigation
+import { FaUser,FaLock, FaBold } from 'react-icons/fa';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+
+export default function SignUpPage() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [init, setInit] = useState(false);
+  const [error, setError] = useState<string | null>(null); // For more specific error display
+  const router = useRouter();
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null); // Clear previous errors
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Get error details
+        if (errorData.message) {
+          setError(errorData.message); // Set specific error message
+          toaster.create({
+            title: errorData.message, // Display the server message
+            type: "error",
+            duration: 3000,
+          });
+        } else {
+          setError("Signup failed."); // Generic message if no specific message is provided
+          toaster.create({
+            title: "Signup failed.",
+            type: "error",
+            duration: 3000,
+          });
+        }
+        return;
+      }
+
+      // Signup successful
+      toaster.create({
+        title: "Account created.",
+        description: "We've created your account for you.",
+        type: "success",
+        duration: 6000,
+      });
+      router.push("/auth/login"); // Redirect using next/navigation
+    } catch (error) {
+      // Handle unexpected errors
+      setError("An unexpected error occurred.");
+      toaster.create({
+        title: "An unexpected error occurred.",
+        type: "error",
+        duration: 3000,
+      });
+    }
+  };
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
+  const particlesLoaded = (container) => {
+    console.log(container);
+  };
+
+  const particlesOptions = useMemo(
+    () => ({
+      background: {
+        color: {
+          value: "#000000",
+        },
+      },
+      fpsLimit: 60,
+      interactivity: {
+        events: {
+          onClick: {
+            enable: true,
+            mode: "push",
+          },
+          onHover: {
+            enable: true,
+            mode: "repulse",
+          },
+          resize: true,
+        },
+        modes: {
+          push: {
+            quantity: 2,
+          },
+          repulse: {
+            distance: 100,
+            duration: 0.2,
+          },
+        },
+      },
+      particles: {
+        color: {
+          value: "#ffffff",
+        },
+        links: {
+          color: "#ffffff",
+          distance: 100,
+          enable: true,
+          opacity: 0.6,
+          width: 0.5,
+        },
+        collisions: {
+          enable: true,
+        },
+        move: {
+          direction: "none",
+          enable: true,
+          outModes: {
+            default: "bounce",
+          },
+          random: false,
+          speed: 1,
+          straight: false,
+        },
+        number: {
+          density: {
+            enable: true,
+            area: 800,
+          },
+          value: 40,
+        },
+        opacity: {
+          value: 0.3,
+        },
+        shape: {
+          type: "circle",
+        },
+        size: {
+          value: { min: 1, max: 3 },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
+
+  return (
+    <Box 
+      className="bg-zinc-800"
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      color="white"
+      p={8}
+    >
+       {init && (
+          <Particles
+          
+            id="tsparticles"
+            particlesLoaded={particlesLoaded}
+            options={particlesOptions}
+          />
+        )}
+      <Container
+        className="bg-black border-solid border-gray-50"
+        maxW="md"
+        p={6}
+        border="1px solid"
+        borderColor="gray"
+        borderRadius="md"
+        boxShadow="lg"
+      >
+        <Toaster />
+        <Heading as="h1" fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
+          Sign Up
+        </Heading>
+
+        <Box as="form" onSubmit={handleSubmit} width="100%">
+          <Fieldset.Root size="lg">
+            <Stack rowGap={4}>
+              <Fieldset.HelperText textAlign="center">
+                
+                Please provide your details below.
+              </Fieldset.HelperText>
+            </Stack>
+
+            <Fieldset.Content>
+              <Field label="Username" required>
+                <Input
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your username"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
+
+              <Field label="Email address" required>
+                <Input
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your email"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
+
+              <Field label="Password" marginBottom={6} required>
+                <Input
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  bg="transparent"
+                  borderColor="gray"
+                  placeholder="Enter your password"
+                  color="white"
+                  padding="4"
+                />
+              </Field>
+            </Fieldset.Content>
+
+            <Button
+            onClick={handleSubmit}
+              type="submit"
+              display="flex"
+              colorScheme="blue"
+              width="40%"
+              padding="6"
+              fontWeight="bold"
+              className="bg-white text-black hover:bg-zinc-200 hover:text-gray-800 "
+              alignSelf="center"
+            >
+              Sign Up
+            </Button>
+          </Fieldset.Root>
+        </Box>
+      </Container>
+    </Box>
+  );
+}
 
 
 
@@ -4305,8 +5093,13 @@ import { Inter, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import { Provider } from "../components/ui/provider";
 import { SocketProvider } from "@/components/ui/SocketProvider";
+import { Orbitron } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  variable: "--font-orbitron",
+});
 const pixelify = Pixelify_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -4321,7 +5114,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} `}>
+      <body className={`${orbitron.className} `}>
         {" "}
         {/* <SocketProvider> */} {/* Place SocketProvider here */}
         <Provider>

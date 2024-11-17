@@ -157,7 +157,7 @@ export default function LoginPage() {
         description: "You have successfully logged in.",
         type: "success",
       });
-      router.push("/");
+      router.push("/play");
     } catch (error) {
       setError("An unexpected error occurred.");
       toaster.create({
