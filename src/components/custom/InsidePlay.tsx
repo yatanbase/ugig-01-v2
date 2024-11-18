@@ -4,6 +4,7 @@ import {
   Button,
   Container,
   Heading,
+  Flex,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -643,7 +644,33 @@ export default function InsidePlay() {
           >
             <FaUserCircle size={32} />
           </Button>
-          <OnlineUsersList onlineUsers={onlineUsers} inGame={false} />
+          <Flex
+            direction="column"
+            align="center"
+            // justify="center"
+            mb={5}
+            minH="20vh"
+            mt={12}
+          >
+            <VStack
+              rowGap={20}
+              align="center"
+              css={{
+                zIndex: 1000,
+              }}
+            >
+              <div style={{ right: "50px" }}>
+                <Image
+                  src={"/gamelogo.gif"}
+                  style={{ right: "50px" }}
+                  alt="Game Logo"
+                  width={200}
+                  height={300}
+                />
+              </div>
+
+              {/* <OnlineUsers /> */}
+               <OnlineUsersList onlineUsers={onlineUsers} inGame={false} />
           {receivedInvite && (
             <button
               style={buttonStyle}
@@ -653,6 +680,9 @@ export default function InsidePlay() {
               Accept Invite from {receivedInvite.from}
             </button>
           )}
+            </VStack>
+          </Flex>
+         
         </>
       )}
 
