@@ -49,7 +49,7 @@ const GameGrid: React.FC<GameGridProps> = ({
   }, [isPredictionEnabled]);
 
   return (
-    <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}>
+    <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}  scale={{base:'0.8',md:'1'}}>
       <Toaster />
       {gridItems.map((item) => {
         const row = Math.floor(item / 8);
@@ -76,11 +76,12 @@ const GameGrid: React.FC<GameGridProps> = ({
           <Box
             key={item}
             bg={bgColor}
-            width={{ base: "30px", md: "50px", lg: "50px" }}
-            height={{ base: "30px", md: "50px", lg: "50px" }}
+            width={{ base: "50px", md: "50px", lg: "50px" }}
+            height={{ base: "50px", md: "50px", lg: "50px" }}
             display="flex"
             alignItems="center"
             justifyContent="center"
+            rowGap={0}
             borderRadius="md"
             cursor={
               isDisabled ||
@@ -99,6 +100,9 @@ const GameGrid: React.FC<GameGridProps> = ({
                 : {}
             }
             onClick={() => {
+              if(predictedCellByMe == cell){
+                return;
+              }
               if (
                 isDisabled ||
                 (!isSelector && !isPredictionEnabled) ||
