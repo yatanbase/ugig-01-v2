@@ -49,88 +49,97 @@ const GameGrid: React.FC<GameGridProps> = ({
   }, [isPredictionEnabled]);
 
   return (
-    <SimpleGrid columns={8} columnGap={2} rowGap={2} p={4}  scale={{base:'0.8',md:'1'}}>
-      <Toaster />
-      {gridItems.map((item) => {
-        const row = Math.floor(item / 8);
-        const col = item % 8;
-        const cell = `${row}-${col}`;
+    <Box width={{ base: "300px", md: "400px", lg: "500px" }}>
+      <SimpleGrid
+        columns={8}
+        columnGap={2}
+        rowGap={2}
+        p={4}
+        width={{ base: "100%", md: "500px", lg: "500px" }}
+      >
+        <Toaster />
+        {gridItems.map((item) => {
+          const row = Math.floor(item / 8);
+          const col = item % 8;
+          const cell = `${row}-${col}`;
 
-        const isDisabled = disabledCells.includes(cell);
-        const isSelectedByMe = cell === selectedCellByMe;
-        const isPredictedByMe = cell === predictedCellByMe;
+          const isDisabled = disabledCells.includes(cell);
+          const isSelectedByMe = cell === selectedCellByMe;
+          const isPredictedByMe = cell === predictedCellByMe;
 
-        let bgColor = "gray.100"; // Default: Unselected
+          let bgColor = "gray.100"; // Default: Unselected
 
-        if (isDisabled) {
-          bgColor = "gray.500"; // Disabled: Dark gray
-        } else if (isSelectedByMe) {
-          bgColor = "green.500"; // Selected by me: Green
-        } else if (isPredictedByMe) {
-          bgColor = "blue.200"; // Predicted by me: blue
-        } else if (selectedCells[cell]) {
-          bgColor = "green.500"; // Selected by opponent: Green (Predictor shouldn't see different color)
-        }
+          if (isDisabled) {
+            bgColor = "gray.500"; // Disabled: Dark gray
+          } else if (isSelectedByMe) {
+            bgColor = "green.500"; // Selected by me: Green
+          } else if (isPredictedByMe) {
+            bgColor = "blue.200"; // Predicted by me: blue
+          } else if (selectedCells[cell]) {
+            bgColor = "green.500"; // Selected by opponent: Green (Predictor shouldn't see different color)
+          }
 
-        return (
-          <Box
-            key={item}
-            bg={bgColor}
-            width={{ base: "50px", md: "50px", lg: "50px" }}
-            height={{ base: "50px", md: "50px", lg: "50px" }}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            rowGap={0}
-            borderRadius="md"
-            cursor={
-              isDisabled ||
-              (!isSelector && !isPredictionEnabled) ||
-              (isPredictor && !isPredictionEnabled)
-                ? "not-allowed"
-                : "pointer"
-            }
-            _hover={
-              !isDisabled &&
-              !isPredictedByMe &&
-              !isSelectedByMe &&
-              ((isSelector && !isPredictionEnabled) ||
-                (isPredictor && isPredictionEnabled))
-                ? { bg: "gray.300" }
-                : {}
-            }
-            onClick={() => {
-              if(predictedCellByMe == cell){
-                return;
-              }
-              if (
+          return (
+            <Box
+              key={item}
+              bg={bgColor}
+              width={{ base: "30px", md: "50px", lg: "50px" }}
+              height={{ base: "30px", md: "50px", lg: "50px" }}
+              marginRight={{ base: "2px", md: "0px" }}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              rowGap={0}
+              borderRadius="md"
+              cursor={
                 isDisabled ||
                 (!isSelector && !isPredictionEnabled) ||
                 (isPredictor && !isPredictionEnabled)
-              ) {
-                toaster.create({
-                  type: "warning",
-                  title: "Not your move!",
-                  duration: 2000,
-                });
-              } else {
-                handleCellClick(cell);
-                if (isSelector) {
-                  setSelectedCellByMe(cell); // Update my selected cell
-                } else if (isPredictor) {
-                  setPredictedCellByMe(cell); // Update my predicted cell
-                }
+                  ? "not-allowed"
+                  : "pointer"
               }
-            }}
-          >
-            {/* Display initials only if selected or predicted BY ME or disabled  */}
-            {(isSelectedByMe || isPredictedByMe || isDisabled) &&
-              selectedCells[cell] &&
-              selectedCells[cell].slice(0, 1).toUpperCase()}
-          </Box>
-        );
-      })}
-    </SimpleGrid>
+              _hover={
+                !isDisabled &&
+                !isPredictedByMe &&
+                !isSelectedByMe &&
+                ((isSelector && !isPredictionEnabled) ||
+                  (isPredictor && isPredictionEnabled))
+                  ? { bg: "gray.300" }
+                  : {}
+              }
+              onClick={() => {
+                if (predictedCellByMe == cell) {
+                  return;
+                }
+                if (
+                  isDisabled ||
+                  (!isSelector && !isPredictionEnabled) ||
+                  (isPredictor && !isPredictionEnabled)
+                ) {
+                  toaster.create({
+                    type: "warning",
+                    title: "Not your move!",
+                    duration: 2000,
+                  });
+                } else {
+                  handleCellClick(cell);
+                  if (isSelector) {
+                    setSelectedCellByMe(cell); // Update my selected cell
+                  } else if (isPredictor) {
+                    setPredictedCellByMe(cell); // Update my predicted cell
+                  }
+                }
+              }}
+            >
+              {/* Display initials only if selected or predicted BY ME or disabled  */}
+              {(isSelectedByMe || isPredictedByMe || isDisabled) &&
+                selectedCells[cell] &&
+                selectedCells[cell].slice(0, 1).toUpperCase()}
+            </Box>
+          );
+        })}
+      </SimpleGrid>
+    </Box>
   );
 };
 
