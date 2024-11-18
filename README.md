@@ -10,7 +10,7 @@ This document provides an overview of the UGIG Guessing Game, including its feat
 
    ```bash
    git clone https://github.com/your-repo/ugig-guessing-game.git
-   cd ugig-guessing-game/frontend
+   cd ugig-guessing-game
    ```
 
 2. **Install Dependencies**:
