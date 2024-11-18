@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## 1. Introduction
 
-## Getting Started
+This document provides an overview of the UGIG Guessing Game, including its features, layouts, and database design. The game allows multi players to take turns guessing a secret number or block or cell, with the winner being the one who guesses correctly first.
 
-First, run the development server:
+## How to Setup :
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Installation Setup for Next.js Frontend
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Clone the Repository**:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   git clone https://github.com/your-repo/ugig-guessing-game.git
+   cd ugig-guessing-game/frontend
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+2. **Install Dependencies**:
+   Ensure you have Node.js installed. Then, run:
 
-## Learn More
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Environment Variables**:
+   Create a `.env.local` file in the root of the `frontend` directory and add the necessary environment variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```env
+   NEXT_PUBLIC_BACKEND_URL = http://localhost:4000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Run the Development Server**:
+   Start the Next.js development server:
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Your Next.js frontend should now be set up and running.
+
+---
+
+## 2. Features
+
+- multi Players: The game is designed for multi players, with each player taking turns guessing.
+- Correct Attempt Counter: Each player’s correct number of attempts is tracked when its 3 , opposite player's turn gets cancelled ( This is not required in MVP)
+- Turn Timer: Each player has a limited time to make a guess.
+- Game End Logic: Either the tiles run out or a player disconnects..
+- Disconnect alert : when a person is in the middle of a game and tries to disconnec the browser throws an error
+- Secure Data : using Jwt and bcrypt for secure data storage and encryption
+- Match request : Player can see the active players and send them an invite to play a game
+- Effects : Confetti at Winning , and bomb popping at losing
+- Cheat Disabled : a player can only select the tiles when its their turn
+
+---
+
+## 3. Game Layouts
+
+### 3.1. Start Screen
+
+**Title**: "2-Player Guessing Game"
+
+**Button**: "Start Game" (Starts the game)
+
+### 3.2. Gameplay Screen
+
+**Player Status:**
+
+Display of Profile button for past games.
+
+Display of the both player's name.
+
+Turn indicator: "Player 1's Turn" or "Player 2's Turn".
+
+Finding all active users.
+
+Feedback for each guess (correct/incorrect).
+
+**Progress:**
+
+### 3.3. End Screen
+
+Winner Announcement: A message displaying the winner ("Player 1 Wins!" or "Player 2 Wins!").
+
+Back to Lobby button.
+
+## **4. Database Design**
+
+### 1. **Players Table**
+
+Stores information about the players.
+
+| Column   | Type    | Description                     |
+| -------- | ------- | ------------------------------- |
+| email    | VARCHAR | Player's email address (unique) |
+| password | VARCHAR | Player's password (hashed)      |
+| username | VARCHAR | Player's username (unique)      |
+
+### 2. **Games Table**
+
+Stores the details of each game.
+
+| Column         | Type        | Description                                                                               |
+| -------------- | ----------- | ----------------------------------------------------------------------------------------- |
+| GameId         | INT         | Unique identifier for the game                                                            |
+| state          | VARCHAR(20) | Current state of the game (`waiting`, `in_progress`, `round_over`, `game_over`, `paused`) |
+| WinnerPlayerId | INT         | Shows the id of player that won the game                                                  |
+| startAt        | TIMESTAMP   | Timestamp when the game started                                                           |
+| endAt          | TIMESTAMP   | Timestamp when the game ended                                                             |
+
+### 3. **GamePlayers Table**
+
+Links players to specific games and manages turn order.
+
+| Column    | Type | Description                                                                                                  |
+| --------- | ---- | ------------------------------------------------------------------------------------------------------------ |
+| GameId    | INT  | Foreign key linking to the `Games` table                                                                     |
+| PlayerId  | INT  | Foreign key linking to the `Players` table                                                                   |
+| joinOrder | INT  | The order in which the player joined the game                                                                |
+| turnOrder | INT  | The player's turn order in the game ( optional for now as we will consider join order to be the turn order ) |
+
+### 4. **Moves Table**
+
+Stores each move made by a player (tile selections, guesses, etc.).
+
+| Column       | Type    | Description                                      |
+| ------------ | ------- | ------------------------------------------------ |
+| GameId       | INT     | Foreign key linking to the `Games` table         |
+| PlaterId     | INT     | Foreign key linking to the `Players` table       |
+| tilePosition | VARCHAR | The position of the tile (e.g., 'A1', 'B3')      |
+| type         | VARCHAR | The type of move (`select`, `guess`, etc.)       |
+| isCorrect    | BOOLEAN | Whether the guess was correct (only for guesses) |
+
+---
+
+## Game States
+
+The **state** column in the `Games` table can hold the following values:
+
+- `waiting`: The game is waiting for players to join.
+- `in_progress`: The game is currently being played.
+- `game_over`: The game has finished, and the winner has been declared.
+- `aborted`: The game is temporarily paused.
+
+---
+
+## Modules
+
+### 1. Authentication Module
+
+### 2. Game Module
+
+### 3. Player Module
