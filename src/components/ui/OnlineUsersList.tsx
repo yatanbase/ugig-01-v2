@@ -25,9 +25,9 @@ export default function Component({ onlineUsers, inGame }: OnlineUserProps) {
         "inviteResponse",
         (response: { success: boolean; message: string }) => {
           if (response.success) {
-            setInviteStatus(`Invite sent successfully to ${response.message}`);
+            setInviteStatus(`Invite sent successfully`);
           } else {
-            setInviteStatus(`Failed to send invite: ${response.message}`);
+            setInviteStatus(`Failed to send invite`);
           }
         }
       );
@@ -181,7 +181,7 @@ export default function Component({ onlineUsers, inGame }: OnlineUserProps) {
               ></div>
             </div>
           ))}
-      </div>
+      </div >
       {inviteStatus && (
         <div
           style={{

@@ -439,8 +439,11 @@ export default function InsidePlay() {
   };
 
   const headingStyle: React.CSSProperties = {
-    fontSize: "2rem",
+    fontSize: "1rem",
     textAlign: "center",
+    position:'fixed',
+    top: "1rem",
+    left: "1rem",
     marginBottom: "2rem",
     textTransform: "uppercase",
     letterSpacing: "3px",
@@ -471,7 +474,7 @@ export default function InsidePlay() {
     color: "#94a3b8", // Muted gray for secondary text
   };
 
-  const scoreStyle: React.CSSProperties = {
+  const playerScoreStyle: React.CSSProperties = {
     fontSize: "1.5rem",
     fontWeight: "bold",
     display: "flex",
@@ -480,7 +483,27 @@ export default function InsidePlay() {
     width: "500px",
     padding: "10px",
     borderRadius: "5px",
-    background: "rgba(255, 255, 255, 0.05)", // Transparent white for subtle contrast
+    background: "rgba(255, 255, 255, 0.05)",
+    marginTop:'0.5rem',
+    transition: "box-shadow 0.3s ease, transform 0.3s ease", // Smooth transition for box-shadow and transform (if needed)
+    ...(isSelector ? { boxShadow: '0 0 10px 4px rgba(76, 175, 80, 0.6)',transform: "scale(1.05)", } : {}), // Transparent white for subtle contrast
+    color: "#e2e8f0", // Off-white for text
+    marginBottom: "10px",
+  };
+
+  const opponentScoreStyle: React.CSSProperties = {
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+    display: "flex",
+    marginTop:'1rem',
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "500px",
+    padding: "10px",
+    borderRadius: "5px",
+    background: "rgba(255, 255, 255, 0.05)",
+    transition: "box-shadow 0.3s ease, transform 0.3s ease", // Smooth transition for box-shadow and transform (if needed)
+    ...(!isSelector ? { boxShadow: '0 0 10px 4px rgba(76, 175, 80, 0.6)',transform: "scale(1.05)", } : {}), // Transparent white for subtle contrast
     color: "#e2e8f0", // Off-white for text
     marginBottom: "10px",
   };
@@ -488,7 +511,7 @@ export default function InsidePlay() {
   const username = sessionStorage.getItem("username") || "";
   const opponent = Object.keys(scores).find((name) => name !== username) || "";
   return (
-    <div style={containerStyle} ref={confettiRef}>
+    <div style={containerStyle} ref={confettiRef} >
       {init && (
         <div
           style={{
@@ -504,12 +527,33 @@ export default function InsidePlay() {
         </div>
       )}
       {showConfetti && (
-        <Confetti
-          width={confettiRef.current?.offsetWidth}
-          height={confettiRef.current?.offsetHeight}
-          recycle={true}
-          numberOfPieces={100}
-        />
+      <>  <Confetti
+      width={confettiRef.current?.offsetWidth}
+      height={confettiRef.current?.offsetHeight}
+      recycle={true}
+      
+      numberOfPieces={100}
+    />
+     <Button css={{ background: "#38bdf8", // Soft teal
+    color: "#f8fafc", // Near-white text
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontFamily: "var(--font-orbitron), sans-serif",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    fontSize: "14px",
+    position: 'fixed',
+    top: '50%',
+    letterSpacing: "1px",
+    zIndex: 5,
+    boxShadow: "0 4px 8px rgba(56, 189, 248, 0.4)", // Subtle glow
+    transition: "all 0.3s ease",
+  }} onClick={()=>{
+      router.push('./play');
+      window.location.reload();
+    }}> Back to Lobby</Button></>
       )}
 
       {showLosingGraphic && (
@@ -546,6 +590,9 @@ export default function InsidePlay() {
           >
             Better luck next time!
           </p>
+          <Button css={buttonStyle} onClick={()=>{
+            router.push('./play')
+          }}> Back to Lobby</Button>
         </div>
       )}
 
@@ -553,7 +600,7 @@ export default function InsidePlay() {
         <>
           <OnlineUsersList onlineUsers={onlineUsers} inGame={false} />
           {receivedInvite && (
-            <button style={buttonStyle} onClick={handleAcceptInvite}>
+            <button style={buttonStyle} className="mt-2" onClick={handleAcceptInvite}>
               Accept Invite from {receivedInvite.from}
             </button>
           )}
@@ -562,12 +609,15 @@ export default function InsidePlay() {
 
       {roomId && gameId && (
         <>
-          <h2 style={headingStyle}>
-            Room: {roomId} | Game: {gameId}
-          </h2>
+          <h3 style={headingStyle}>
+            RoomId: {roomId}
+          </h3>
 
           {/* Opponent's score */}
-          <div style={scoreStyle}>
+
+
+          
+          <div style={opponentScoreStyle}>
             <span>{opponent}</span>
             <AnimatePresence>
               {animateScores[opponent] && (
@@ -585,6 +635,7 @@ export default function InsidePlay() {
             {!animateScores[opponent] && <span>{scores[opponent]}</span>}
           </div>
 
+
           <GameGrid
             handleCellClick={handleCellClick}
             selectedCells={selectedCells}
@@ -596,7 +647,7 @@ export default function InsidePlay() {
           />
 
           {/* Player's score */}
-          <div style={scoreStyle}>
+          <div style={playerScoreStyle}>
             <span>{username}</span>
             <AnimatePresence>
               {animateScores[username] && (
@@ -613,13 +664,14 @@ export default function InsidePlay() {
             </AnimatePresence>
             {!animateScores[username] && <span>{scores[username]}</span>}
           </div>
+          
 
           {isSelector && (
             <>
               <p style={{ ...textStyle, color: "#4caf50" }}>
                 You are the Selector
               </p>
-              <button style={buttonStyle}>Select a cell</button>
+              <p className="text-2xl mb-2"> Select a Cell</p>
             </>
           )}
           {isPredictor && (
@@ -634,12 +686,13 @@ export default function InsidePlay() {
               )}
             </>
           )}
+          
           <OnlineUsersList onlineUsers={onlineUsers} inGame={true} />
         </>
       )}
 
       {!roomId && !gameId && (
-        <p style={textStyle}>Waiting to Create or Join a room...</p>
+        <p style={textStyle} className="mt-2">Waiting to Create or Join a room...</p>
       )}
 
       <style jsx global>{`
