@@ -670,19 +670,18 @@ export default function InsidePlay() {
               </div>
 
               {/* <OnlineUsers /> */}
-               <OnlineUsersList onlineUsers={onlineUsers} inGame={false} />
-          {receivedInvite && (
-            <button
-              style={buttonStyle}
-              className="mt-2"
-              onClick={handleAcceptInvite}
-            >
-              Accept Invite from {receivedInvite.from}
-            </button>
-          )}
+              {receivedInvite && (
+                <button
+                  style={buttonStyle}
+                  className="mt-2"
+                  onClick={handleAcceptInvite}
+                >
+                  Accept Invite from {receivedInvite.from}
+                </button>
+              )}
+              <OnlineUsersList onlineUsers={onlineUsers} inGame={false} />
             </VStack>
           </Flex>
-         
         </>
       )}
 
